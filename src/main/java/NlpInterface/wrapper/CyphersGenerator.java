@@ -1,0 +1,96 @@
+package NlpInterface.wrapper;
+
+import NlpInterface.entity.*;
+import NlpInterface.entity.TokenMapping.NLPAttributeMapping;
+import NlpInterface.entity.TokenMapping.NLPAttributeSchemaMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
+import NlpInterface.extractmodel.GraphSchemaKeywords;
+
+public class CyphersGenerator {
+    public static Query query;
+    public static String generate(Query query){
+        /*从tupleLinks翻译到cypher*/
+        CyphersGenerator.query = query;
+        String matchText = getMatchCypher();
+        String whereText = getWhereCypher();
+        String returnText = getReturnCypher();
+
+        return matchText + " " + whereText + " " + returnText;
+    }
+
+    public static String getReturnCypher(){
+        String returnText = "RETURN";
+        for (int i = 0; i < query.focusNode.nextRelation.size(); i++){
+            NLPRelation relation = query.focusNode.nextRelation.get(i);
+            NLPNode node = query.focusNode.nextNode.get(i);
+            if (relation.otherType != null && relation.otherType.equals("has")){
+                if (node.token.mapping instanceof NLPAttributeSchemaMapping){
+                    if (node.nextNode.size() == 0){
+                        returnText += String.format(" n%d.%s",query.focusNode.id,((NLPAttributeSchemaMapping)node.token.mapping).attrType);
+                        return returnText;
+                    }
+
+                }
+            }
+
+        }
+        returnText += String.format(" n%d",query.focusNode.id);
+        return returnText;
+    }
+
+    public static String getWhereCypher(){
+        String whereText = "WHERE";
+        boolean first = true;
+        for (NLPNode node : query.nodes) {
+            if (!(node.token.mapping instanceof NLPVertexSchemaMapping)) continue;
+            for (int i = 0; i < node.nextNode.size(); i++){
+                boolean firstAttrValue = true;
+                NLPRelation relation = node.nextRelation.get(i);
+                String attrStr = "";
+                NLPNode nodeA = node.nextNode.get(i);
+                if (relation.otherType != null && relation.otherType.equals("has")){
+                    for (NLPNode nodeB : nodeA.nextNode){
+                        if (firstAttrValue) attrStr += String.format("n%d.%s =\"%s\"",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeMapping)nodeB.token.mapping).attrValue);
+                        else attrStr += String.format(" OR n%d.%s =\"%s\"",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeMapping)nodeB.token.mapping).attrValue);
+                        firstAttrValue = false;
+                    }
+                }
+                if (attrStr.length() <= 0) continue;
+                if (first) whereText += String.format(" (%s)",attrStr); else whereText += String.format(" AND (%s)",attrStr);
+            }
+            if (! (node.token.mapping instanceof NLPVertexMapping)) continue;
+            if  (first){
+                whereText += String.format(" (n%d.%s = \"%s\")",node.id,
+                        GraphSchemaKeywords.getSingle().types.get(((NLPVertexMapping) node.token.mapping).vertex.labels).getLeft(),
+                        ((NLPVertexMapping) node.token.mapping).vertex.name);
+            }else{
+                whereText += String.format(" AND (n%d.%s = \"%s\")",node.id,
+                        GraphSchemaKeywords.getSingle().types.get(((NLPVertexMapping) node.token.mapping).vertex.labels).getLeft(),
+                        ((NLPVertexMapping) node.token.mapping).vertex.name);
+            }
+
+        }
+        return whereText;
+    }
+
+    public static String getMatchCypher(){
+        String matchText = "";
+        for (NLPInferenceLink inferenceLink: query.inferenceLinks){
+            NLPInferenceNode start = inferenceLink.start;
+            String matchStr = "MATCH ";
+            while (start != null){
+                if (start.node.token.mapping instanceof  NLPVertexSchemaMapping)
+                    matchStr += String.format("(n%d:%s)",start.node.id,((NLPVertexSchemaMapping)start.node.token.mapping).vertexType.name); else
+                    matchStr += String.format("(n%d:%s)",start.node.id,((NLPVertexSchemaMapping)start.node.token.mapping).vertexType.name);
+                if (start.isEnd) { break;}
+                String r = "";
+                if (start.nextRelation.edgeType != null) r = "["+start.nextRelation.edgeType.name+"]";
+                if (start.direct) matchStr += String.format("-%s->",r); else matchStr += String.format("-%s->",r);
+                start = start.nextInferNode;
+            }
+            matchText += matchStr;
+        }
+        return matchText;
+    }
+}

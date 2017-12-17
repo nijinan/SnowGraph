@@ -36,7 +36,7 @@ public class GraphSchemaKeywords {
         types.put(JiraExtractor.PATCH, new ImmutablePair<>(JiraExtractor.PATCH_ID,JiraExtractor.PATCH_NAME));
 
         types.put(MailListExtractor.MAIL, new ImmutablePair<>(MailListExtractor.MAIL_ID,MailListExtractor.MAIL_SUBJECT));
-        types.put(MailListExtractor.MAILUSER, new ImmutablePair<>(MailListExtractor.MAILUSER_MAIL,MailListExtractor.MAILUSER_MAIL));
+        types.put(MailListExtractor.MAILUSER, new ImmutablePair<>(MailListExtractor.MAILUSER_NAMES,MailListExtractor.MAILUSER_MAIL));
 
         types.put(StackOverflowExtractor.QUESTION, new ImmutablePair<>(StackOverflowExtractor.QUESTION_ID,StackOverflowExtractor.QUESTION_TITLE));
         types.put(StackOverflowExtractor.ANSWER, new ImmutablePair<>(StackOverflowExtractor.ANSWER_ID,StackOverflowExtractor.ANSWER_BODY));

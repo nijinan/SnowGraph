@@ -27,7 +27,18 @@ public class TokenMapping {
                 double similar = isSimilar(token.text, edgeTypeName);
                 if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
                     NLPMapping mapping = new NLPEdgeSchemaMapping(edgeTypeName,null, token, similar);
+                    if (token.mapping == null){
+                        token.mappingList.add(mapping);
+                        token.mapping = mapping;
+                        continue;
+                    }
+                    if (similar < token.mapping.score + 0.01){
+                        token.mappingList.add(mapping);
+                        continue;
+                    }
+                    token.mappingList.clear();
                     token.mapping = mapping;
+                    token.mappingList.add(mapping);
                     //break;
                 }
             }
@@ -36,7 +47,18 @@ public class TokenMapping {
                 double similar = isSimilar(token.text, vertexTypeName);
                 if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
                     NLPMapping mapping = new NLPVertexSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),token, similar);
+                    if (token.mapping == null){
+                        token.mappingList.add(mapping);
+                        token.mapping = mapping;
+                        continue;
+                    }
+                    if (similar < token.mapping.score + 0.01){
+                        token.mappingList.add(mapping);
+                        continue;
+                    }
+                    token.mappingList.clear();
                     token.mapping = mapping;
+                    token.mappingList.add(mapping);
                     //break;
                 }
             }
@@ -59,7 +81,19 @@ public class TokenMapping {
                     }
                     if (!flag) continue;
                     NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
+                    //token.mapping = mapping;
+                    if (token.mapping == null){
+                        token.mappingList.add(mapping);
+                        token.mapping = mapping;
+                        continue;
+                    }
+                    if (similar < token.mapping.score + 0.01){
+                        token.mappingList.add(mapping);
+                        continue;
+                    }
+                    token.mappingList.clear();
                     token.mapping = mapping;
+                    token.mappingList.add(mapping);
                     //break;
                 }
             }
@@ -68,9 +102,20 @@ public class TokenMapping {
             if (token.mapping != null) continue;
             for (Vertex vertex : graph.getAllVertexes()){
                 double similar = isSimilar(token.text, vertex.name);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score - 0.01) )){
                     NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
+                    if (token.mapping == null){
+                        token.mappingList.add(mapping);
+                        token.mapping = mapping;
+                        continue;
+                    }
+                    if (similar < token.mapping.score + 0.01){
+                        token.mappingList.add(mapping);
+                        continue;
+                    }
+                    token.mappingList.clear();
                     token.mapping = mapping;
+                    token.mappingList.add(mapping);
                     //break;
                 }
             }
@@ -90,7 +135,19 @@ public class TokenMapping {
                     double similar = isSimilar(token.text, attrName);
                     if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
                         NLPMapping mapping = new NLPAttributeSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),attrName,token, similar);
+                        //token.mapping = mapping;
+                        if (token.mapping == null){
+                            token.mappingList.add(mapping);
+                            token.mapping = mapping;
+                            continue;
+                        }
+                        if (similar < token.mapping.score + 0.01){
+                            token.mappingList.add(mapping);
+                            continue;
+                        }
+                        token.mappingList.clear();
                         token.mapping = mapping;
+                        token.mappingList.add(mapping);
                         //break;
                     }
                 }
@@ -120,8 +177,18 @@ public class TokenMapping {
                         double similar = isSimilar(token.text, attrValue);
                         if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
                             NLPMapping mapping = new NLPAttributeMapping(vertex, graphSchema.vertexTypes.get(vertex.labels), attrTypeName, attrValue, token, similar);
+                            if (token.mapping == null){
+                                token.mappingList.add(mapping);
+                                token.mapping = mapping;
+                                continue;
+                            }
+                            if (similar < token.mapping.score + 0.01){
+                                token.mappingList.add(mapping);
+                                continue;
+                            }
+                            token.mappingList.clear();
                             token.mapping = mapping;
-                            //break;
+                            token.mappingList.add(mapping);
                         }
                     }
                 }
@@ -136,5 +203,11 @@ public class TokenMapping {
         if (str1.contains(str2) && (2 * str2.length() >  str1.length())) return ((double)str2.length()) / str1.length();
         if (str2.contains(str1) && (2 * str1.length() >  str2.length())) return ((double)str1.length()) / str2.length();
         return 0;
+    }
+    public static boolean isUnDirect(String str){
+        if (str.endsWith("ed")){
+            return true;
+        }
+        return false;
     }
 }

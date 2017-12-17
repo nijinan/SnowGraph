@@ -19,10 +19,9 @@ public class NLPQueryServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         String cypherStr = request.getParameter("query");
-        response.setContentType("text/plain");
+        response.setContentType("application/json");
         response.getWriter().print(NLPInterpreter.pipeline(cypherStr));
     }
 }

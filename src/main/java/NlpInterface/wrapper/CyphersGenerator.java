@@ -15,12 +15,13 @@ public class CyphersGenerator {
         String matchText = getMatchCypher();
         String whereText = getWhereCypher();
         String returnText = getReturnCypher();
-
+        if (matchText.equals("") || whereText.equals("")||returnText.equals("")) return "";
         return matchText + " " + whereText + " " + returnText;
     }
 
     public static String getReturnCypher(){
         String returnText = "RETURN";
+        if (query.focusNode == null) return "";
         for (int i = 0; i < query.focusNode.nextRelation.size(); i++){
             NLPRelation relation = query.focusNode.nextRelation.get(i);
             NLPNode node = query.focusNode.nextNode.get(i);
@@ -58,6 +59,7 @@ public class CyphersGenerator {
                 }
                 if (attrStr.length() <= 0) continue;
                 if (first) whereText += String.format(" (%s)",attrStr); else whereText += String.format(" AND (%s)",attrStr);
+                first = false;
             }
             if (! (node.token.mapping instanceof NLPVertexMapping)) continue;
             if  (first){
@@ -71,6 +73,7 @@ public class CyphersGenerator {
             }
 
         }
+        if (whereText.equals("WHERE")) return "";
         return whereText;
     }
 
@@ -86,7 +89,7 @@ public class CyphersGenerator {
                 if (start.isEnd) { break;}
                 String r = "";
                 if (start.nextRelation.edgeType != null) r = "["+start.nextRelation.edgeType.name+"]";
-                if (start.direct) matchStr += String.format("-%s->",r); else matchStr += String.format("-%s->",r);
+                if (start.direct) matchStr += String.format("-%s->",r); else matchStr += String.format("<-%s-",r);
                 start = start.nextInferNode;
             }
             matchText += matchStr;

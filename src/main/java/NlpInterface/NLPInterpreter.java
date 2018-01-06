@@ -13,11 +13,14 @@ import java.util.Set;
 
 public class NLPInterpreter {
     public static String cypherStr = "";
+    public static Query ansQuery;
+    public static List<Query> queries = new ArrayList<>();
     private static int offsetMax;
     public static JSONObject pipeline(String plainText){
+        queries.clear();
         Query query = generatorTokens(plainText);
         mapTokensToNodeAndRelation(query);
-        Set<NLPToken> tmp = new HashSet<>();
+        List<NLPToken> tmp = new ArrayList<>();
         offsetMax = query.tokens.size();
         for (NLPToken token : query.tokens){
             if (token.mapping != null){
@@ -34,6 +37,17 @@ public class NLPInterpreter {
         DFS(query,0,list,arr);
         //generatorTuples(query);
         //generatorTupleLinks(query);
+
+        for (Query query1 : queries){
+            Evaluator.evaluate(query1);
+            if (query1.score < -0.1) continue;
+            generatorInferenceLinks(query1);
+            String s = generatorCyphers(query1);
+            if (!s.equals("")) {
+                cypherStr += s + "</br>";
+                arr.put(s);
+            }
+        }
         obj.put("rankedResults",arr);
         return obj;
         /*CypherSet cyphers = generatorCyphers(query);
@@ -44,18 +58,14 @@ public class NLPInterpreter {
 
     public static void DFS(Query query, int offset, List<Integer> list, JSONArray arr){
         if (offset == offsetMax){
-            Query newquery = query.copy();
-            for (NLPToken token : newquery.tokens){
-                token.mapping = token.mappingList.get(list.get((int)token.offset));
 
+            for (NLPToken token : query.tokens){
+                token.mapping = token.mappingList.get(list.get((int)token.offset));
             }
+            Query newquery = query.copyOut();
             mapToSchema(newquery);
-            generatorInferenceLinks(newquery);
-            String s = generatorCyphers(newquery);
-            if (!s.equals("")) {
-                cypherStr += s + "</br>";
-                arr.put(s);
-            }
+            List<Query> querys = EdgeMappingSchema.process(newquery);
+            queries.addAll(querys);
             return;
         }
         boolean flag = false;

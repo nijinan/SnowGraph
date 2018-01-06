@@ -12,6 +12,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TokenMapping {
     public static double threshold = 0.5;
     public static void process(Query query){
@@ -194,6 +197,21 @@ public class TokenMapping {
                 }
             }
             tx.success();
+        }
+        for (NLPToken token : query.tokens){
+            /*先schema匹配，后实体匹配*/
+            if (!(token.mapping instanceof NLPEdgeSchemaMapping)) continue;
+            List<NLPMapping> newlist = new ArrayList<>();
+            for (NLPMapping mapping : token.mappingList){
+                String edgeTypeName = ((NLPEdgeSchemaMapping)mapping).type;
+                double similar = isSimilar(token.text, edgeTypeName);
+                for (GraphEdgeType edgeType : graphSchema.edgeTypes.get(edgeTypeName)){
+                    NLPMapping newmapping = new NLPEdgeSchemaMapping(edgeTypeName,edgeType, token, similar);
+                    newlist.add(newmapping);
+                    token.mapping = newmapping;
+                }
+            }
+            token.mappingList = newlist;
         }
     }
     public static double isSimilar(String str1, String str2){

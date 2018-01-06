@@ -11,7 +11,7 @@ public class NLPNode {
     public List<NLPRelation> nextRelation = new ArrayList<>();
     public List<NLPNode> lastNode = new ArrayList<>();
     public List<NLPRelation> lastRelation = new ArrayList<>();
-    public long id;
+    public int id;
     public boolean focus = false;
     public NLPNode (NLPToken token){
         this.token = token;
@@ -23,5 +23,15 @@ public class NLPNode {
     public void addLast(NLPNode node, NLPRelation relation){
         lastNode.add(node);
         lastRelation.add(relation);
+    }
+    public NLPNode copy(){
+        NLPNode node = new NLPNode(token);
+        node.id = id;
+        node.focus = focus;
+
+        node.nextRelation.addAll(nextRelation);
+        node.lastRelation.addAll(lastRelation);
+
+        return node;
     }
 }

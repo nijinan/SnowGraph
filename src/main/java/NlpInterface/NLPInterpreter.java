@@ -39,14 +39,19 @@ public class NLPInterpreter {
         //generatorTupleLinks(query);
 
         for (Query query1 : queries){
-            Evaluator.evaluate(query1);
-            if (query1.score < -0.1) continue;
-            generatorInferenceLinks(query1);
-            String s = generatorCyphers(query1);
-            if (!s.equals("")) {
-                cypherStr += s + "</br>";
-                arr.put(s);
+            List<Query> listq = new ArrayList<>();
+            listq.addAll(LinkAllNodes.process(query1));
+            for (Query q : listq){
+                Evaluator.evaluate(q);
+                if (q.score < -0.1) continue;
+                generatorInferenceLinks(q);
+                String s = generatorCyphers(q);
+                if (!s.equals("")) {
+                    cypherStr += s + "</br>";
+                    arr.put(s);
+                }
             }
+
         }
         obj.put("rankedResults",arr);
         return obj;

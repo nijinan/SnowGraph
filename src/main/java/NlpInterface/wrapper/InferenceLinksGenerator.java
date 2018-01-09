@@ -22,6 +22,7 @@ public class InferenceLinksGenerator {
         findLink(link.start);
     }
     public static void init(){
+        visited.clear();
         int cnt = 0;
         for (NLPNode node : query.nodes){
             if (node.token.mapping instanceof NLPVertexSchemaMapping)
@@ -56,7 +57,7 @@ public class InferenceLinksGenerator {
         for (int i = 0; i < startNode.nextNode.size(); i++){
             NLPNode node = startNode.nextNode.get(i);
             NLPRelation relation = startNode.nextRelation.get(i);
-            if (relation.edgeType == null) continue;
+            if (relation.edgeType == null && !relation.otherType.equals("hidden")) continue;
             if (visited.contains(relation) || visited.contains(relation.mirror)) continue;
             if (flag){
                 NLPInferenceLink link = new NLPInferenceLink();
@@ -79,6 +80,7 @@ public class InferenceLinksGenerator {
         for (int i = 0; i < startNode.lastNode.size(); i++){
             NLPNode node = startNode.lastNode.get(i);
             NLPRelation relation = startNode.lastRelation.get(i);
+            if (relation.edgeType == null && !relation.otherType.equals("hidden")) continue;
             if (visited.contains(relation) || visited.contains(relation.mirror)) continue;
             if (flag){
                 NLPInferenceLink link = new NLPInferenceLink();

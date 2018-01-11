@@ -1,10 +1,11 @@
 package NlpInterface.wrapper;
 
-import NlpInterface.entity.NLPNode;
-import NlpInterface.entity.NLPRelation;
-import NlpInterface.entity.NLPToken;
-import NlpInterface.entity.Query;
+import NlpInterface.entity.*;
 import NlpInterface.entity.TokenMapping.NLPAttributeSchemaMapping;
+import NlpInterface.entity.TokenMapping.NLPMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
+import NlpInterface.schema.GraphVertexType;
+import NlpInterface.schema.GraphPath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,11 @@ public class LinkAllNodes {
         colors = 0;
         coloring();
         MST();
+        for (int i = 0; i < colors; i++) if(prim[i] > 1e9){
+            return queries;
+        }
         linking();
+
         queries.add(query);
         return queries;
     }
@@ -54,7 +59,12 @@ public class LinkAllNodes {
     public static double distance(NLPNode node1, NLPNode node2){
         if (node1.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
         if (node2.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
-        return 1.0;
+        if (node1.token.mapping instanceof NLPVertexSchemaMapping && node2.token.mapping instanceof NLPVertexSchemaMapping){
+            if (((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.keySet().contains(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name)){
+                return ((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name).edges.size();
+            }
+        }
+        return 1e10;
     }
     public static void MST(){
         //distance between color
@@ -99,14 +109,32 @@ public class LinkAllNodes {
     }
     public static void linking(){
         for (int i = 1; i < colors; i++){
+            NLPNode nodei = query.nodes.get(primi[i]);
+            NLPNode nodej = query.nodes.get(primj[i]);
+            GraphPath path = ((NLPVertexSchemaMapping)nodei.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping)nodej.token.mapping).vertexType.name);
+            NLPNode last = nodei;
+            for (GraphVertexType vertexType : path.nodes){
+                NLPRelation relation1 = new NLPRelation("hidden");
+                NLPRelation relation2 = new NLPRelation("hidden");
+                relation1.mirror = relation2;
+                relation2.mirror = relation1;
+                NLPNode newNode = new NLPNode(new NLPToken("what"));
+                NLPMapping mapping = new NLPVertexSchemaMapping(vertexType,newNode.token,1);
+                newNode.token.mapping = mapping;
+                newNode.id = query.nodes.size();
+                query.nodes.add(newNode);
+                last.addNext(newNode,relation1);
+                newNode.addNext(last,relation2);
+                last = newNode;
+            }
             NLPRelation relation1 = new NLPRelation("hidden");
             NLPRelation relation2 = new NLPRelation("hidden");
             relation1.mirror = relation2;
             relation2.mirror = relation1;
-            NLPNode nodei = query.nodes.get(primi[i]);
-            NLPNode nodej = query.nodes.get(primj[i]);
-            nodei.addNext(nodej, relation1);
-            nodej.addLast(nodei, relation2);
+            last.addNext(nodej, relation1);
+            nodej.addLast(last, relation2);
         }
     }
+
+
 }

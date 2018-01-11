@@ -15,7 +15,7 @@ public class CyphersGenerator {
         String matchText = getMatchCypher();
         String whereText = getWhereCypher();
         String returnText = getReturnCypher();
-        if (matchText.equals("") || whereText.equals("")||returnText.equals("")) return "";
+        if (matchText.equals("") ||returnText.equals("")) return "";
         return matchText + " " + whereText + " " + returnText;
     }
 

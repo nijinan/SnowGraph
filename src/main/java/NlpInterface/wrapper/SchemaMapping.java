@@ -24,7 +24,7 @@ public class SchemaMapping {
     }
     public static void init(){
         for (NLPToken token : query.tokens)
-            if (token.mapping != null && !(token.mapping instanceof NLPEdgeSchemaMapping))
+            if (token.mapping != null && !(token.mapping instanceof NLPEdgeSchemaMapping || token.mapping instanceof NLPPathSchemaMapping))
                 query.nodes.add(new NLPNode(token));
         int cnt = 0;
         for (NLPNode node : query.nodes) {

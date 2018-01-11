@@ -11,8 +11,13 @@ public class GraphVertexType {
     public Set<GraphEdgeType> outcomingsEdges = new HashSet<>();
     public Set<GraphEdgeType> incomingsEdges = new HashSet<>();
     public Map<String,GraphAttribute> attrs = new HashMap<>();
+    public Map<String,GraphPath> shortestPaths = new HashMap<>();
     public String name;
     public GraphVertexType(String name){
         this.name = name;
+    }
+    @Override
+    public boolean equals(Object v) {
+        return  (v instanceof  GraphVertexType && ((GraphVertexType) v).name.equals(name));
     }
 }

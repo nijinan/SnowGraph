@@ -1,6 +1,7 @@
 package NlpInterface.wrapper;
 
 import NlpInterface.entity.*;
+import NlpInterface.entity.TokenMapping.NLPVertexMapping;
 import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
 
 import java.util.HashSet;
@@ -39,6 +40,16 @@ public class InferenceLinksGenerator {
                 query.focusNode = node;
                 startNode = node;
                 return;
+            }
+        }
+        for (NLPNode node : query.nodes){
+            if (node.token.mapping instanceof NLPVertexSchemaMapping && !(node.token.mapping instanceof NLPVertexMapping)) {
+                int nums = node.nextNode.size() + node.lastNode.size();
+                if (nums == 1) {
+                    query.focusNode = node;
+                    startNode = node;
+                    return;
+                }
             }
         }
         for (NLPNode node : query.nodes){

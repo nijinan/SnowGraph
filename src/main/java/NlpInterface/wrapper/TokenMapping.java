@@ -7,6 +7,7 @@ import NlpInterface.extractmodel.ExtractModel;
 import NlpInterface.extractmodel.Graph;
 import NlpInterface.extractmodel.Vertex;
 import NlpInterface.schema.GraphEdgeType;
+import NlpInterface.schema.GraphPath;
 import NlpInterface.schema.GraphSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -30,6 +31,26 @@ public class TokenMapping {
                 double similar = isSimilar(token.text, edgeTypeName);
                 if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
                     NLPMapping mapping = new NLPEdgeSchemaMapping(edgeTypeName,null, token, similar);
+                    if (token.mapping == null){
+                        token.mappingList.add(mapping);
+                        token.mapping = mapping;
+                        continue;
+                    }
+                    if (similar < token.mapping.score + 0.01){
+                        token.mappingList.add(mapping);
+                        continue;
+                    }
+                    token.mappingList.clear();
+                    token.mapping = mapping;
+                    token.mappingList.add(mapping);
+                    //break;
+                }
+            }
+            if (token.mapping != null) continue;
+            for (String pathName : graphSchema.paths.keySet()){
+                double similar = isSimilar(token.text, pathName);
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                    NLPMapping mapping = new NLPPathSchemaMapping(pathName,null, token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
                         token.mapping = mapping;
@@ -207,6 +228,21 @@ public class TokenMapping {
                 double similar = isSimilar(token.text, edgeTypeName);
                 for (GraphEdgeType edgeType : graphSchema.edgeTypes.get(edgeTypeName)){
                     NLPMapping newmapping = new NLPEdgeSchemaMapping(edgeTypeName,edgeType, token, similar);
+                    newlist.add(newmapping);
+                    token.mapping = newmapping;
+                }
+            }
+            token.mappingList = newlist;
+        }
+        for (NLPToken token : query.tokens){
+            /*先schema匹配，后实体匹配*/
+            if (!(token.mapping instanceof NLPPathSchemaMapping)) continue;
+            List<NLPMapping> newlist = new ArrayList<>();
+            for (NLPMapping mapping : token.mappingList){
+                String edgeTypeName = ((NLPPathSchemaMapping)mapping).type;
+                double similar = isSimilar(token.text, edgeTypeName);
+                for (GraphPath edgeType : graphSchema.paths.get(edgeTypeName)){
+                    NLPMapping newmapping = new NLPPathSchemaMapping(edgeTypeName,edgeType, token, similar);
                     newlist.add(newmapping);
                     token.mapping = newmapping;
                 }

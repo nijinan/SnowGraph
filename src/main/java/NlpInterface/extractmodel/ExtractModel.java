@@ -1,5 +1,6 @@
 package NlpInterface.extractmodel;
 
+import NlpInterface.rules.PathsJson;
 import NlpInterface.schema.GraphPath;
 import NlpInterface.schema.GraphAttribute;
 import NlpInterface.schema.GraphEdgeType;
@@ -42,15 +43,7 @@ public class ExtractModel {
 		return graph;
 	}
 	private void addPreDefined(){
-		GraphPath path = new GraphPath();
-		path.start = graphSchema.vertexTypes.get("Class");
-		path.end = graphSchema.vertexTypes.get("Method");
-		path.nodes.add(graphSchema.vertexTypes.get("Method"));
-		path.edges.add(graphSchema.findGraphEdgeTypeByNameAndVertex("have_method",path.start,path.end));
-		path.edges.add(graphSchema.findGraphEdgeTypeByNameAndVertex("call_method",path.end,path.end));
-		Set<GraphPath> entry = new HashSet<>();
-		entry.add(path);
-		graphSchema.paths.put("call", entry);
+		PathsJson.getPaths(graphSchema);
 	}
 	private void floyd(){
 
@@ -69,8 +62,8 @@ public class ExtractModel {
 			for (GraphEdgeType edgeType : edgeTypes){
 				dis[str2id.get(edgeType.start.name)][str2id.get(edgeType.end.name)] = 1;
 				dis[str2id.get(edgeType.end.name)][str2id.get(edgeType.start.name)] = 1;
-				dir[str2id.get(edgeType.start.name)][str2id.get(edgeType.end.name)] = 1;
-				dir[str2id.get(edgeType.end.name)][str2id.get(edgeType.start.name)] = -1;
+//				dir[str2id.get(edgeType.start.name)][str2id.get(edgeType.end.name)] = 1;
+//				dir[str2id.get(edgeType.end.name)][str2id.get(edgeType.start.name)] = -1;
 				edgePath[str2id.get(edgeType.start.name)][str2id.get(edgeType.end.name)] = edgeType;
 				edgePath[str2id.get(edgeType.end.name)][str2id.get(edgeType.start.name)] = edgeType;
 			}
@@ -171,8 +164,8 @@ public class ExtractModel {
 				for (String type : vertexType.outcomings.keySet()) {
 					for (GraphVertexType dstVertex : vertexType.outcomings.get(type)){
 						if (!graphSchema.edgeTypes.containsKey(type)) graphSchema.edgeTypes.put(type, new HashSet<>());
-						graphSchema.edgeTypes.get(type).add(new GraphEdgeType(type,vertexType,dstVertex));
-
+						graphSchema.edgeTypes.get(type).add(new GraphEdgeType(type,vertexType,dstVertex,true));
+						//graphSchema.edgeTypes.get(type).add(new GraphEdgeType(type,dstVertex,vertexType,false));
 					}
 				}
 			}

@@ -6,10 +6,13 @@ public class GraphEdgeType {
     public GraphVertexType start;
     public GraphVertexType end;
     public String name;
-    public GraphEdgeType(String name, GraphVertexType start, GraphVertexType end){
+    public boolean direct = true;
+    public GraphEdgeType mirror;
+    public GraphEdgeType(String name, GraphVertexType start, GraphVertexType end, boolean direct){
         this.name = name;
         this.start = start;
         this.end = end;
+        this.direct = direct;
     }
     @Override
     public boolean equals(Object v) {

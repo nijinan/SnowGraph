@@ -6,10 +6,7 @@ import NlpInterface.wrapper.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NLPInterpreter {
     public static String cypherStr = "";
@@ -17,6 +14,7 @@ public class NLPInterpreter {
     public static List<Query> queries = new ArrayList<>();
     private static int offsetMax;
     public static JSONObject pipeline(String plainText){
+
         queries.clear();
         Query query = generatorTokens(plainText);
         mapTokensToNodeAndRelation(query);
@@ -37,7 +35,8 @@ public class NLPInterpreter {
         DFS(query,0,list,arr);
         //generatorTuples(query);
         //generatorTupleLinks(query);
-
+        int tot = 0;
+        List<Query> answers = new ArrayList<>();
         for (Query query1 : queries){
             List<Query> listq = new ArrayList<>();
             listq.addAll(LinkAllNodes.process(query1));
@@ -46,14 +45,21 @@ public class NLPInterpreter {
                 if (q.score < -0.1) continue;
                 generatorInferenceLinks(q);
                 String s = generatorCyphers(q);
+                q.cypher = s;
                 if (!s.equals("")) {
                     cypherStr += s + "</br>";
-                    arr.put(s);
+                    q.rank = tot;
+                    tot++;
+                    //arr.put(q.toJsonQuery());
+                    answers.add(q);
                 }
             }
-
+            answers.sort(Comparator.comparing(p->p.score));
         }
-        obj.put("rankedResults",arr);
+        for (Query q : answers) {
+            arr.put(q.toJsonQuery());
+        }
+        obj.put("rankedResults", arr);
         return obj;
         /*CypherSet cyphers = generatorCyphers(query);
         for (Cypher cypher : cyphers.sets){

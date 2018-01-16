@@ -10,6 +10,7 @@ public class NLPRelation {
     public GraphAttribute attrType;
     public String otherType;
     public NLPRelation mirror;
+    public boolean direct = true;
     public NLPRelation(){
     }
     public NLPRelation(String type){

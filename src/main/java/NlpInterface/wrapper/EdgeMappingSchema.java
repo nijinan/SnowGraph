@@ -53,9 +53,10 @@ public class EdgeMappingSchema {
                     NLPNode nodeStartFinal = newquery.nodes.get(mapStart[i]);
                     NLPNode nodeEndFinal = newquery.nodes.get(mapEnd[i]);
                     NLPNode last = nodeStartFinal;
+                    int tot = 0;
                     for (GraphVertexType vertexType : path.nodes){
-                        NLPRelation relation1 = new NLPRelation("hidden");
-                        NLPRelation relation2 = new NLPRelation("hidden");
+                        NLPRelation relation1 = new NLPRelation(path.edges.get(tot));
+                        NLPRelation relation2 = new NLPRelation(path.edges.get(tot));
                         relation1.mirror = relation2;
                         relation2.mirror = relation1;
                         NLPNode newNode = new NLPNode(new NLPToken("what"));
@@ -63,16 +64,27 @@ public class EdgeMappingSchema {
                         newNode.token.mapping = mapping;
                         newNode.id = newquery.nodes.size();
                         newquery.nodes.add(newNode);
-                        last.addNext(newNode,relation1);
-                        newNode.addNext(last,relation2);
+                        if (path.edgesDirect.get(tot)) {
+                            last.addNext(newNode,relation1);
+                            newNode.addNext(last,relation2);
+                        }else{
+                            newNode.addNext(last,relation1);
+                            last.addNext(newNode,relation2);
+                        }
                         last = newNode;
+                        tot++;
                     }
-                    NLPRelation relation1 = new NLPRelation("hidden");
-                    NLPRelation relation2 = new NLPRelation("hidden");
+                    NLPRelation relation1 = new NLPRelation(path.edges.get(tot));
+                    NLPRelation relation2 = new NLPRelation(path.edges.get(tot));
                     relation1.mirror = relation2;
                     relation2.mirror = relation1;
-                    last.addNext(nodeEndFinal, relation1);
-                    nodeEndFinal.addLast(last, relation2);
+                    if (path.edgesDirect.get(tot)) {
+                        last.addNext(nodeEndFinal, relation1);
+                        nodeEndFinal.addLast(last, relation2);
+                    }else{
+                        nodeEndFinal.addNext(last, relation1);
+                        last.addLast(nodeEndFinal, relation2);
+                    }
 
                 }
             }

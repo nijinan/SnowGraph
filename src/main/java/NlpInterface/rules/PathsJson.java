@@ -1,0 +1,94 @@
+package NlpInterface.rules;
+
+import NlpInterface.schema.GraphEdgeType;
+import NlpInterface.schema.GraphPath;
+import NlpInterface.schema.GraphSchema;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class PathsJson {
+    public static JSONArray JsonArr = null;
+    public static GraphSchema graphSchema;
+    public static String nodeName[] = new String[100];
+    public static String edgeName[] = new String[100];
+    public static void readJson(){
+        String lines = "";
+        try {
+             lines = FileUtils.readFileToString(new File(NlpInterface.rules.PathsJson.class.getResource("/").getPath() + "Path.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JsonArr = new JSONArray(lines);
+    }
+
+    public static void getPaths(GraphSchema _graphSchema){
+        graphSchema = _graphSchema;
+        if (JsonArr == null){
+            readJson();
+        }
+        List<GraphPath> ret = new ArrayList<>();
+        for(int id = 0 ; id < JsonArr.length() ;id++){
+            JSONObject pathObj = JsonArr.getJSONObject(id);
+            DFS(pathObj,0);
+        }
+    }
+    public static void DFS(JSONObject json, int t){
+        if (t == json.getInt("length")){
+            for (int i = 0; i < json.getJSONArray("relations").getJSONObject(t-1).getJSONArray("to").length(); i++){
+                nodeName[t] = json.getJSONArray("relations").getJSONObject(t-1).getJSONArray("to").getString(i);
+                GraphPath path = new GraphPath();
+                path.start = graphSchema.vertexTypes.get(nodeName[0]);
+                path.end = graphSchema.vertexTypes.get(nodeName[t]);
+                boolean flag = true;
+                for (int j = 1; j < t; j++)  path.nodes.add(graphSchema.vertexTypes.get(nodeName[j]));
+                String edgen = json.getJSONArray("relations").getJSONObject(0).getString("via");
+                boolean direct = json.getJSONArray("relations").getJSONObject(0).getBoolean("direct");
+                GraphEdgeType edge;
+                if (direct) edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.start,path.nodes.get(0)); else
+                    edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.nodes.get(0),path.start);
+                if (edge == null) continue;
+                path.edges.add(edge);
+                path.edgesDirect.add(direct);
+                for (int j = 1; j < t-1; j++) {
+                    edgen = json.getJSONArray("relations").getJSONObject(t).getString("via");
+                    direct = json.getJSONArray("relations").getJSONObject(t).getBoolean("direct");
+                    if (direct) edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.nodes.get(j-1),path.nodes.get(j)); else
+                        edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.nodes.get(j),path.nodes.get(j-1));
+                    if (edge == null) { flag = false; break;}
+                    path.edges.add(edge);
+                    path.edgesDirect.add(direct);
+                }
+                if (!flag) continue;
+                edgen = json.getJSONArray("relations").getJSONObject(t-1).getString("via");
+                direct = json.getJSONArray("relations").getJSONObject(t-1).getBoolean("direct");
+                if (direct) edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.nodes.get(t-2),path.end); else
+                    edge = graphSchema.findGraphEdgeTypeByNameAndVertex(edgen,path.end,path.nodes.get(t-2));
+                if (edge == null) continue;
+                path.edges.add(edge);
+                path.edgesDirect.add(direct);
+                for (int k = 0; k < json.getJSONArray("keywords").length(); k++){
+                    String key = json.getJSONArray("keywords").getString(k);
+                    if (!graphSchema.paths.keySet().contains(key)){
+                        Set<GraphPath> entry = new HashSet<>();
+                        graphSchema.paths.put(key,entry);
+                    }
+                    graphSchema.paths.get(key).add(path);
+                }
+            }
+            return ;
+        }
+        for (int i = 0; i < json.getJSONArray("relations").getJSONObject(t).getJSONArray("from").length(); i++){
+            nodeName[t] = json.getJSONArray("relations").getJSONObject(t).getJSONArray("from").getString(i);
+            DFS(json,t+1);
+        }
+
+    }
+}

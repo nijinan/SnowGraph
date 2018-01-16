@@ -1,0 +1,24 @@
+{
+  "node":
+  [
+    {
+      "nodeName" : ["StackOverflowUser","JiraIssueUser","StackOverflowUser","MailUser"],
+      "similar" : ["user","person","who"]
+    },
+    {
+      "nodeName" : ["gitCommit"],
+      "similar" : ["commit"]
+    }
+  ],
+  "relation":
+  [
+    {
+      "relationName" : ["call_method"],
+      "similar" : ["call"]
+    },
+    {
+      "relationName" : ["soAuthor"],
+      "similar" : ["author","write"]
+    }
+  ]
+}

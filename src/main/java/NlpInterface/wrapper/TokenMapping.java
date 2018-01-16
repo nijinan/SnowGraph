@@ -6,6 +6,7 @@ import NlpInterface.entity.TokenMapping.*;
 import NlpInterface.extractmodel.ExtractModel;
 import NlpInterface.extractmodel.Graph;
 import NlpInterface.extractmodel.Vertex;
+import NlpInterface.rules.SynonymJson;
 import NlpInterface.schema.GraphEdgeType;
 import NlpInterface.schema.GraphPath;
 import NlpInterface.schema.GraphSchema;
@@ -251,6 +252,12 @@ public class TokenMapping {
         }
     }
     public static double isSimilar(String str1, String str2){
+        if (SynonymJson.edgedict.containsKey(str1)){
+            if (SynonymJson.edgedict.get(str1).contains(str2)) return 1;
+        }
+        if (SynonymJson.nodedict.containsKey(str1)){
+            if (SynonymJson.nodedict.get(str1).contains(str2)) return 1;
+        }
         str1 = str1.toLowerCase();
         str2 = str2.toLowerCase();
         if (str1.equals(str2)) return 1;

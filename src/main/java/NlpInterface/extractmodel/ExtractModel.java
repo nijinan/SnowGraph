@@ -35,6 +35,9 @@ public class ExtractModel {
 		graph = pipeline();
 		floyd();
 		addPreDefined();
+		System.out.println("nodes  " +  graph.vertexes.size());
+		System.out.println("edges  "+ graphSchema.vertexTypes.size());
+		System.out.println("edges  "+ graphSchema.edgeTypes.size());
 		//for (Vertex vertex:graph.getAllVertexes()) System.out.println(vertex.name);
 	}
 

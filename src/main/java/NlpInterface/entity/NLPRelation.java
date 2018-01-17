@@ -16,7 +16,12 @@ public class NLPRelation {
     public NLPRelation(String type){
         this.otherType = type;
     }
-    public NLPRelation(GraphEdgeType type){
+    public NLPRelation(GraphEdgeType type, String name){
         this.edgeType = type;
+        this.otherType = name;
+    }
+    public NLPRelation(GraphEdgeType type, NLPToken token){
+        this.edgeType = type;
+        this.token = token;
     }
 }

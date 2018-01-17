@@ -38,6 +38,9 @@ public class NLPInterpreter {
         int tot = 0;
         List<Query> answers = new ArrayList<>();
         for (Query query1 : queries){
+            if (query1.nodes.size() == 3)
+                System.out.println();
+            if (query1.nodes.size() == 0) continue;
             List<Query> listq = new ArrayList<>();
             listq.addAll(LinkAllNodes.process(query1));
             for (Query q : listq){
@@ -54,8 +57,10 @@ public class NLPInterpreter {
                     answers.add(q);
                 }
             }
-            answers.sort(Comparator.comparing(p->p.score));
         }
+        System.out.println(answers.size());
+        answers.sort(Comparator.comparing(p->p.score));
+        if (answers.size() > 20) answers = answers.subList(0,20);
         for (Query q : answers) {
             arr.put(q.toJsonQuery());
         }
@@ -69,8 +74,8 @@ public class NLPInterpreter {
 
     public static void DFS(Query query, int offset, List<Integer> list, JSONArray arr){
         if (offset == offsetMax){
-
             for (NLPToken token : query.tokens){
+                if (list.get((int)token.offset) < 0) token.mapping = null; else
                 token.mapping = token.mappingList.get(list.get((int)token.offset));
             }
             Query newquery = query.copyOut();
@@ -83,12 +88,15 @@ public class NLPInterpreter {
         for (NLPToken token : query.tokens){
             if (token.offset == offset){
                 flag = true;
+                list.set(offset,-1);
+                DFS(query,offset+1, list,arr);
                 for (int i = 0; i < token.mappingList.size(); i++){
                     list.set(offset,i);
                     DFS(query,offset+1, list,arr);
                 }
             }
         }
+
         if (!flag) DFS(query,offset+1, list,arr);
     }
 

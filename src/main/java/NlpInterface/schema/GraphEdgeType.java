@@ -8,6 +8,7 @@ public class GraphEdgeType {
     public String name;
     public boolean direct = true;
     public GraphEdgeType mirror;
+    public double score;
     public GraphEdgeType(String name, GraphVertexType start, GraphVertexType end, boolean direct){
         this.name = name;
         this.start = start;

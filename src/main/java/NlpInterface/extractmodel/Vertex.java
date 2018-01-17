@@ -11,6 +11,7 @@ public class Vertex {
 	public String name;
 	public String longName;
 	public String labels;
+	public double score = 0;
 	public Map<String, Set<Vertex>> incomingEdges = new HashMap<>();
 	public Map<String, Set<Vertex>> outgoingEdges = new HashMap<>();
 	public Vertex(long id, String name, String longName, String label){

@@ -47,6 +47,7 @@ public class SchemaMapping {
                             NLPRelation relation2 = new NLPRelation("is");
                             relation1.mirror = relation2;
                             relation2.mirror = relation1;
+                            relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
                             find = true;
@@ -72,6 +73,7 @@ public class SchemaMapping {
                             NLPRelation relation2 = new NLPRelation("has");
                             relation1.mirror = relation2;
                             relation2.mirror = relation1;
+                            relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
                             find = true;
@@ -96,6 +98,7 @@ public class SchemaMapping {
                             NLPRelation relation2 = new NLPRelation("has");
                             relation1.mirror = relation2;
                             relation2.mirror = relation1;
+                            relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
                             faNode.focus = true;
@@ -115,6 +118,7 @@ public class SchemaMapping {
                             NLPRelation relation2 = new NLPRelation("has");
                             relation1.mirror = relation2;
                             relation2.mirror = relation1;
+                            relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
                             faNode.focus = true;
@@ -157,8 +161,8 @@ public class SchemaMapping {
                 }
             }
             if (flagFind) {
-                NLPRelation relation1 = new NLPRelation(edgeType);
-                NLPRelation relation2 = new NLPRelation(edgeType);
+                NLPRelation relation1 = new NLPRelation(edgeType,token);
+                NLPRelation relation2 = new NLPRelation(edgeType,token);
                 relation1.mirror = relation2;
                 relation2.mirror = relation1;
                 nodeStartFinal.addNext(nodeEndFinal, relation1);
@@ -202,8 +206,8 @@ public class SchemaMapping {
                 }
             }
             if (flagFind) {
-                NLPRelation relation1 = new NLPRelation(edgeType);
-                NLPRelation relation2 = new NLPRelation(edgeType);
+                NLPRelation relation1 = new NLPRelation(edgeType,token);
+                NLPRelation relation2 = new NLPRelation(edgeType,token);
                 relation1.mirror = relation2;
                 relation2.mirror = relation1;
                 nodeStartFinal.addNext(nodeEndFinal, relation1);

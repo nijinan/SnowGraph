@@ -22,23 +22,23 @@
     "keywords": ["change"]
   },
   {
-    "start" : ["GitCommitAuthor"],
+    "start" : ["gitCommitAuthor"],
     "end" : ["Method","Interface"],
     "length" : 2,
     "relations" :
     [
-      {"from" : ["GitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
+      {"from" : ["gitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
       {"from" : ["gitCommit"] , "to" : ["Method","Class","Interface"] , "via" : "apiNameMention", "direct" : true}
     ],
     "keywords": ["change"]
   },
   {
-    "start" : ["GitCommitAuthor"],
+    "start" : ["gitCommitAuthor"],
     "end" : ["Class"],
     "length" : 2,
     "relations" :
     [
-      {"from" : ["GitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
+      {"from" : ["gitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
       {"from" : ["gitCommit"] , "to" : ["Class"] , "via" : "commit_change_the_class", "direct" : true}
     ],
     "keywords": ["change"]

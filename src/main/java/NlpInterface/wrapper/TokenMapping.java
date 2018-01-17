@@ -15,6 +15,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TokenMapping {
@@ -30,7 +31,7 @@ public class TokenMapping {
             if (token.mapping != null) continue;
             for (String edgeTypeName : graphSchema.edgeTypes.keySet()){
                 double similar = isSimilar(token.text, edgeTypeName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPEdgeSchemaMapping(edgeTypeName,null, token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -41,16 +42,16 @@ public class TokenMapping {
                         token.mappingList.add(mapping);
                         continue;
                     }
-                    token.mappingList.clear();
+                    //token.mappingList.clear();
                     token.mapping = mapping;
                     token.mappingList.add(mapping);
                     //break;
                 }
             }
-            if (token.mapping != null) continue;
+            //if (token.mapping != null) continue;
             for (String pathName : graphSchema.paths.keySet()){
                 double similar = isSimilar(token.text, pathName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPPathSchemaMapping(pathName,null, token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -61,16 +62,16 @@ public class TokenMapping {
                         token.mappingList.add(mapping);
                         continue;
                     }
-                    token.mappingList.clear();
+                    //token.mappingList.clear();
                     token.mapping = mapping;
                     token.mappingList.add(mapping);
                     //break;
                 }
             }
-            if (token.mapping != null) continue;
+            //if (token.mapping != null) continue;
             for (String vertexTypeName : graphSchema.vertexTypes.keySet()){
                 double similar = isSimilar(token.text, vertexTypeName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPVertexSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -81,7 +82,7 @@ public class TokenMapping {
                         token.mappingList.add(mapping);
                         continue;
                     }
-                    token.mappingList.clear();
+                    //token.mappingList.clear();
                     token.mapping = mapping;
                     token.mappingList.add(mapping);
                     //break;
@@ -92,7 +93,7 @@ public class TokenMapping {
             if (token.mapping != null) continue;
             for (Vertex vertex : graph.getAllVertexes()){
                 double similar = isSimilar(token.text, vertex.name);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     boolean flag = false;
                     for (NLPToken tok : query.tokens){
                         if (tok.mapping != null && tok.mapping instanceof NLPEdgeSchemaMapping){
@@ -116,7 +117,7 @@ public class TokenMapping {
                         token.mappingList.add(mapping);
                         continue;
                     }
-                    token.mappingList.clear();
+                    //token.mappingList.clear();
                     token.mapping = mapping;
                     token.mappingList.add(mapping);
                     //break;
@@ -127,7 +128,7 @@ public class TokenMapping {
             if (token.mapping != null) continue;
             for (Vertex vertex : graph.getAllVertexes()){
                 double similar = isSimilar(token.text, vertex.name);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score - 0.01) )){
+                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score - 0.01*/) )){
                     NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -138,7 +139,7 @@ public class TokenMapping {
                         token.mappingList.add(mapping);
                         continue;
                     }
-                    token.mappingList.clear();
+                    //token.mappingList.clear();
                     token.mapping = mapping;
                     token.mappingList.add(mapping);
                     //break;
@@ -158,7 +159,7 @@ public class TokenMapping {
                 if (!flag) continue;
                 for (String attrName : graphSchema.vertexTypes.get(vertexTypeName).attrs.keySet()){
                     double similar = isSimilar(token.text, attrName);
-                    if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                    if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                         NLPMapping mapping = new NLPAttributeSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),attrName,token, similar);
                         //token.mapping = mapping;
                         if (token.mapping == null){
@@ -170,7 +171,7 @@ public class TokenMapping {
                             token.mappingList.add(mapping);
                             continue;
                         }
-                        token.mappingList.clear();
+                        //token.mappingList.clear();
                         token.mapping = mapping;
                         token.mappingList.add(mapping);
                         //break;
@@ -200,7 +201,7 @@ public class TokenMapping {
                         if (!(obj instanceof String)) continue;
                         String attrValue = (String)obj;
                         double similar = isSimilar(token.text, attrValue);
-                        if (similar > threshold  && ((token.mapping == null)||(token.mapping != null && similar > token.mapping.score) )){
+                        if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                             NLPMapping mapping = new NLPAttributeMapping(vertex, graphSchema.vertexTypes.get(vertex.labels), attrTypeName, attrValue, token, similar);
                             if (token.mapping == null){
                                 token.mappingList.add(mapping);
@@ -211,7 +212,7 @@ public class TokenMapping {
                                 token.mappingList.add(mapping);
                                 continue;
                             }
-                            token.mappingList.clear();
+                            //token.mappingList.clear();
                             token.mapping = mapping;
                             token.mappingList.add(mapping);
                         }
@@ -222,9 +223,13 @@ public class TokenMapping {
         }
         for (NLPToken token : query.tokens){
             /*先schema匹配，后实体匹配*/
-            if (!(token.mapping instanceof NLPEdgeSchemaMapping)) continue;
+
             List<NLPMapping> newlist = new ArrayList<>();
             for (NLPMapping mapping : token.mappingList){
+                if (!(mapping instanceof NLPEdgeSchemaMapping)) {
+                    newlist.add(mapping);
+                    continue;
+                }
                 String edgeTypeName = ((NLPEdgeSchemaMapping)mapping).type;
                 double similar = isSimilar(token.text, edgeTypeName);
                 for (GraphEdgeType edgeType : graphSchema.edgeTypes.get(edgeTypeName)){
@@ -237,9 +242,12 @@ public class TokenMapping {
         }
         for (NLPToken token : query.tokens){
             /*先schema匹配，后实体匹配*/
-            if (!(token.mapping instanceof NLPPathSchemaMapping)) continue;
             List<NLPMapping> newlist = new ArrayList<>();
             for (NLPMapping mapping : token.mappingList){
+                if (!(mapping instanceof NLPPathSchemaMapping)) {
+                    newlist.add(mapping);
+                    continue;
+                }
                 String edgeTypeName = ((NLPPathSchemaMapping)mapping).type;
                 double similar = isSimilar(token.text, edgeTypeName);
                 for (GraphPath edgeType : graphSchema.paths.get(edgeTypeName)){
@@ -250,7 +258,56 @@ public class TokenMapping {
             }
             token.mappingList = newlist;
         }
+        /*计算score & rank*/
+        for (NLPToken token : query.tokens){
+            for (NLPMapping mapping : token.mappingList){
+                String name = null;
+                String name1 = null;
+                String name2 = null;
+                if (mapping instanceof NLPPathSchemaMapping){
+                    name1 = ((NLPPathSchemaMapping)mapping).path.start.name;
+                    name2 = ((NLPPathSchemaMapping)mapping).path.end.name;
+                    name = ((NLPPathSchemaMapping)mapping).type;
+                }else if (mapping instanceof NLPEdgeSchemaMapping){
+                    name1 = ((NLPEdgeSchemaMapping)mapping).edgeType.start.name;
+                    name2 = ((NLPEdgeSchemaMapping)mapping).edgeType.end.name;
+                    name = ((NLPEdgeSchemaMapping)mapping).type;
+                }else if (mapping instanceof NLPVertexSchemaMapping){
+                    name = ((NLPVertexSchemaMapping)mapping).vertexType.name;
+                }else if (mapping instanceof NLPVertexMapping){
+                    name = ((NLPVertexMapping)mapping).vertex.longName;
+                }else if (mapping instanceof NLPAttributeSchemaMapping){
+                    name = ((NLPAttributeSchemaMapping)mapping).attrType;
+                }else if (mapping instanceof NLPAttributeMapping){
+                    name = ((NLPAttributeMapping)mapping).attrValue;
+                }
+                if (name1 != null){
+                    mapping.score = mapping.score + disText(name,query) * 0.4 + disText(name1,query) * 0.3 + disText(name2,query) * 0.3;
+                }else
+                mapping.score = mapping.score + disText(name,query);
+
+            }
+
+            token.mappingList.sort(Comparator.comparing(p->p.score*-1));
+            if (token.mappingList.size() > 10){
+                token.mappingList = token.mappingList.subList(0,10);
+            }
+            for (int i = 0;  i < token.mappingList.size(); i++) token.mappingList.get(i).rank = i;
+        }
+        for (NLPToken token : query.tokens){
+            if (token.mappingList.size() == 0) token.nomapping = true;
+        }
     }
+    /*计算一个token和文本的相似度*/
+    public static double disText(String str, Query query){
+        double ret = 0;
+        for (NLPToken token : query.tokens){
+            ret += isSimilar(str,token.text);
+        }
+        ret /= query.tokens.size();
+        return ret;
+    }
+    /*计算两个token的相似度，后者为NN*/
     public static double isSimilar(String str1, String str2){
         if (SynonymJson.edgedict.containsKey(str1)){
             if (SynonymJson.edgedict.get(str1).contains(str2)) return 1;

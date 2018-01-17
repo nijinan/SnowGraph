@@ -11,7 +11,7 @@ public class NLPToken {
     public List<NLPMapping> mappingList = new ArrayList<>();
     public String POS;
     public String NE;
-
+    public boolean nomapping = false;
     public long offset = -1;
     public NLPToken(String text){
         this.text = text;
@@ -27,6 +27,7 @@ public class NLPToken {
     public NLPToken copy(){
         NLPToken token = new NLPToken(text,POS,NE);
         token.offset = offset;
+        token.nomapping = nomapping;
         token.mapping = mapping;
         return  token;
     }

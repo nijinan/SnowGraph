@@ -56,12 +56,46 @@ public class LinkAllNodes {
             if (color[lastNode.id] < 0) visit(lastNode,c);
         }
     }
+
+    public static double getAverageOffset(NLPNode node){
+        List<NLPNode> allNodes = new ArrayList<>();
+        List<NLPRelation> allRelations = new ArrayList<>();
+        allNodes.addAll(node.nextNode);
+        allNodes.addAll(node.lastNode);
+        allRelations.addAll(node.nextRelation);
+        allRelations.addAll(node.lastRelation);
+        double offset = 0;
+        int tmp = 0;
+        for (int i = 0; i < allNodes.size(); i++){
+            if (allNodes.get(i).token.offset >= -0.1){
+                tmp ++;
+                offset += allNodes.get(i).token.offset;
+            }
+            if (allRelations.get(i).token != null){
+                tmp ++;
+                offset += allRelations.get(i).token.offset;
+            }
+        }
+        offset /= tmp;
+        return offset;
+    }
+
     public static double distance(NLPNode node1, NLPNode node2){
         if (node1.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
         if (node2.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
         if (node1.token.mapping instanceof NLPVertexSchemaMapping && node2.token.mapping instanceof NLPVertexSchemaMapping){
             if (((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.keySet().contains(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name)){
-                return ((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name).edges.size();
+                int step = ((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name).edges.size();
+                double offset1 = node1.token.offset;
+                double offset2 = node2.token.offset;
+                if (offset1 < 0){
+                    offset1 = getAverageOffset(node1);
+                }
+                if (offset2 < 0){
+                    offset2 = getAverageOffset(node2);
+                }
+                return step * 100 + Math.abs(offset1 - offset2);
+
             }
         }
         return 1e10;
@@ -118,19 +152,21 @@ public class LinkAllNodes {
                 NLPRelation relation2 = new NLPRelation("hidden");
                 relation1.mirror = relation2;
                 relation2.mirror = relation1;
+                relation2.direct = false;
                 NLPNode newNode = new NLPNode(new NLPToken("what"));
                 NLPMapping mapping = new NLPVertexSchemaMapping(vertexType,newNode.token,1);
                 newNode.token.mapping = mapping;
                 newNode.id = query.nodes.size();
                 query.nodes.add(newNode);
                 last.addNext(newNode,relation1);
-                newNode.addNext(last,relation2);
+                newNode.addLast(last,relation2);
                 last = newNode;
             }
             NLPRelation relation1 = new NLPRelation("hidden");
             NLPRelation relation2 = new NLPRelation("hidden");
             relation1.mirror = relation2;
             relation2.mirror = relation1;
+            relation2.direct = false;
             last.addNext(nodej, relation1);
             nodej.addLast(last, relation2);
         }

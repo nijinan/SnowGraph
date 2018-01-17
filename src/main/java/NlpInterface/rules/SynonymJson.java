@@ -30,7 +30,7 @@ public class SynonymJson {
             JSONObject obj = JsonObj.getJSONArray("node").getJSONObject(i);
             JSONArray nodeArr = obj.getJSONArray("nodeName");
             JSONArray simArr = obj.getJSONArray("similar");
-            for (int j = 0; j <  nodeArr.length(); i++){
+            for (int j = 0; j <  nodeArr.length(); j++){
                 for (int k = 0; k <  simArr.length(); k++){
                     String nodeStr = nodeArr.getString(j);
                     String simStr = simArr.getString(k);
@@ -43,9 +43,9 @@ public class SynonymJson {
         }
         for (int i = 0; i < JsonObj.getJSONArray("relation").length(); i++){
             JSONObject obj = JsonObj.getJSONArray("relation").getJSONObject(i);
-            JSONArray edgeArr = obj.getJSONArray("nodeName");
+            JSONArray edgeArr = obj.getJSONArray("relationName");
             JSONArray simArr = obj.getJSONArray("similar");
-            for (int j = 0; j <  edgeArr.length(); i++){
+            for (int j = 0; j <  edgeArr.length(); j++){
                 for (int k = 0; k <  simArr.length(); k++){
                     String edgeStr = edgeArr.getString(j);
                     String simStr = simArr.getString(k);

@@ -39,10 +39,11 @@ public class EdgeMappingSchema {
                 NLPToken token = query.tokens.get(i);
                 if (token.mapping instanceof  NLPEdgeSchemaMapping){
                     GraphEdgeType edgeType = ((NLPEdgeSchemaMapping) token.mapping).edgeType;
-                    NLPRelation relation1 = new NLPRelation(edgeType);
-                    NLPRelation relation2 = new NLPRelation(edgeType);
+                    NLPRelation relation1 = new NLPRelation(edgeType,token);
+                    NLPRelation relation2 = new NLPRelation(edgeType,token);
                     relation1.mirror = relation2;
                     relation2.mirror = relation1;
+                    relation2.direct = false;
                     NLPNode nodeStartFinal = newquery.nodes.get(mapStart[i]);
                     NLPNode nodeEndFinal = newquery.nodes.get(mapEnd[i]);
                     nodeStartFinal.addNext(nodeEndFinal, relation1);
@@ -55,10 +56,11 @@ public class EdgeMappingSchema {
                     NLPNode last = nodeStartFinal;
                     int tot = 0;
                     for (GraphVertexType vertexType : path.nodes){
-                        NLPRelation relation1 = new NLPRelation(path.edges.get(tot));
-                        NLPRelation relation2 = new NLPRelation(path.edges.get(tot));
+                        NLPRelation relation1 = new NLPRelation(path.edges.get(tot),token);
+                        NLPRelation relation2 = new NLPRelation(path.edges.get(tot),token);
                         relation1.mirror = relation2;
                         relation2.mirror = relation1;
+                        relation2.direct = false;
                         NLPNode newNode = new NLPNode(new NLPToken("what"));
                         NLPMapping mapping = new NLPVertexSchemaMapping(vertexType,newNode.token,1);
                         newNode.token.mapping = mapping;
@@ -66,18 +68,19 @@ public class EdgeMappingSchema {
                         newquery.nodes.add(newNode);
                         if (path.edgesDirect.get(tot)) {
                             last.addNext(newNode,relation1);
-                            newNode.addNext(last,relation2);
+                            newNode.addLast(last,relation2);
                         }else{
                             newNode.addNext(last,relation1);
-                            last.addNext(newNode,relation2);
+                            last.addLast(newNode,relation2);
                         }
                         last = newNode;
                         tot++;
                     }
-                    NLPRelation relation1 = new NLPRelation(path.edges.get(tot));
-                    NLPRelation relation2 = new NLPRelation(path.edges.get(tot));
+                    NLPRelation relation1 = new NLPRelation(path.edges.get(tot),token);
+                    NLPRelation relation2 = new NLPRelation(path.edges.get(tot),token);
                     relation1.mirror = relation2;
                     relation2.mirror = relation1;
+                    relation2.direct = false;
                     if (path.edgesDirect.get(tot)) {
                         last.addNext(nodeEndFinal, relation1);
                         nodeEndFinal.addLast(last, relation2);
@@ -201,8 +204,8 @@ public class EdgeMappingSchema {
             if (flagFind) {
                 GraphEdgeType edgeType = ExtractModel.getSingle().graphSchema.findGraphEdgeTypeByNameAndVertex(edgeTypeName,
                         ((NLPVertexSchemaMapping) nodeStartFinal.token.mapping).vertexType, ((NLPVertexSchemaMapping) nodeEndFinal.token.mapping).vertexType);
-                NLPRelation relation1 = new NLPRelation(edgeType);
-                NLPRelation relation2 = new NLPRelation(edgeType);
+                NLPRelation relation1 = new NLPRelation(edgeType,token);
+                NLPRelation relation2 = new NLPRelation(edgeType,token);
                 relation1.mirror = relation2;
                 relation2.mirror = relation1;
                 nodeStartFinal.addNext(nodeEndFinal, relation1);
@@ -264,8 +267,8 @@ public class EdgeMappingSchema {
             if (flagFind) {
                 GraphEdgeType edgeType = ExtractModel.getSingle().graphSchema.findGraphEdgeTypeByNameAndVertex(edgeTypeName,
                         ((NLPVertexSchemaMapping) nodeStartFinal.token.mapping).vertexType, ((NLPVertexSchemaMapping) nodeEndFinal.token.mapping).vertexType);
-                NLPRelation relation1 = new NLPRelation(edgeType);
-                NLPRelation relation2 = new NLPRelation(edgeType);
+                NLPRelation relation1 = new NLPRelation(edgeType,token);
+                NLPRelation relation2 = new NLPRelation(edgeType,token);
                 relation1.mirror = relation2;
                 relation2.mirror = relation1;
                 nodeStartFinal.addNext(nodeEndFinal, relation1);

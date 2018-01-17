@@ -13,6 +13,7 @@ public class GraphVertexType {
     public Map<String,GraphAttribute> attrs = new HashMap<>();
     public Map<String,GraphPath> shortestPaths = new HashMap<>();
     public String name;
+    public double score;
     public GraphVertexType(String name){
         this.name = name;
     }

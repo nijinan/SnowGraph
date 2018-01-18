@@ -21,6 +21,7 @@ public class Query {
     public double score = 0;
     public String cypher;
     public int rank;
+    public String returnType = "node";
     public NLPNode getNodeById(int id){
         return nodes.get(id);
     }
@@ -91,7 +92,7 @@ public class Query {
             }
             nodesJson.put(nodeObj);
         }
-        if (focusNode.token.mapping instanceof NLPAttributeSchemaMapping) graphJson.put("returnType","string"); else graphJson.put("returnType","node");
+         queryJson.put("returnType",returnType);
         graphJson.put("nodes",nodesJson);
         graphJson.put("edges",edgesJson);
         queryJson.put("graph",graphJson);

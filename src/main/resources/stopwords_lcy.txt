@@ -175,7 +175,6 @@ println
 run
 null
 iter
-classpath
 version
 luck
 jar
@@ -191,14 +190,11 @@ import
 source
 project
 wiki
-interface
 thusand
 hundred
-stackoverflow
 fine
 tonight
 var
-extend
 book
 isn
 aren

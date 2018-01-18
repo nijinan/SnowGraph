@@ -18,6 +18,9 @@ public class JettyServer {
         ServletHolder sh = new ServletHolder(new NLPQueryServlet());
         context.addServlet(sh, "/NLPQuery");
 
+        ServletHolder sh2 = new ServletHolder(new CypherQueryServlet());
+        context.addServlet(sh2, "/CypherQuery");
+
         FilterHolder fh = handler.addFilterWithMapping(SimpleCORSFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         fh.setInitParameter("initParamKey", "InitParamValue");
 

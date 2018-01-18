@@ -38,8 +38,6 @@ public class NLPInterpreter {
         int tot = 0;
         List<Query> answers = new ArrayList<>();
         for (Query query1 : queries){
-            if (query1.nodes.size() == 3)
-                System.out.println();
             if (query1.nodes.size() == 0) continue;
             List<Query> listq = new ArrayList<>();
             listq.addAll(LinkAllNodes.process(query1));

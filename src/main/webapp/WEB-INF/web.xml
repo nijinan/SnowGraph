@@ -8,7 +8,7 @@
         <description></description>
         <display-name>CypherQuery</display-name>
         <servlet-name>CypherQuery</servlet-name>
-        <servlet-class>servlet.CypherQueryServlet</servlet-class>
+        <servlet-class>NlpInterface.jettyserver.CypherQueryServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>CypherQuery</servlet-name>
@@ -79,6 +79,17 @@
     <servlet-mapping>
         <servlet-name>Nav</servlet-name>
         <url-pattern>/Nav</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description></description>
+        <display-name>IN_NLPQuery</display-name>
+        <servlet-name>IN_NLPQuery</servlet-name>
+        <servlet-class>NlpInterface.jettyserver.NLPQueryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>IN_NLPQuery</servlet-name>
+        <url-pattern>/NLPQuery</url-pattern>
     </servlet-mapping>
 
     <filter>

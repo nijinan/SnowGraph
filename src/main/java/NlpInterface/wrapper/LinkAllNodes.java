@@ -24,7 +24,7 @@ public class LinkAllNodes {
     public static List<Query> process(Query query){
         LinkAllNodes.query = query;
         queries = new ArrayList<>();
-        for (int i = 0; i < 100; i++) color[i] = -1;
+        for (int i = 0; i < 100; i++) {color[i] = -1; prim[i] = 1e10;}
         for (int i = 0; i < 100; i++)
             for (int j = 0; j < 100; j++)
                 dis[i][j] = 1e10;
@@ -132,7 +132,7 @@ public class LinkAllNodes {
                     primj[j] = disj[x][j];
                 }
             }
-            x = 0;
+            x = colors;
             for (int j = 0; j < colors; j++){
                 if (prim[j] > 0.1 && prim[j] < prim[x]) {
                     x = j;

@@ -292,7 +292,14 @@ public class TokenMapping {
             if (token.mappingList.size() > 10){
                 token.mappingList = token.mappingList.subList(0,10);
             }
-            for (int i = 0;  i < token.mappingList.size(); i++) token.mappingList.get(i).rank = i;
+            for (int i = 0;  i < token.mappingList.size(); i++) {
+                token.mappingList.get(i).rank = i;
+                if (i > 0){
+                    if (Math.abs(token.mappingList.get(i).score - token.mappingList.get(i-1).score) < 0.01){
+                        token.mappingList.get(i).rank = token.mappingList.get(i-1).rank;
+                    }
+                }
+            }
         }
         for (NLPToken token : query.tokens){
             if (token.mappingList.size() == 0) token.nomapping = true;
@@ -315,11 +322,12 @@ public class TokenMapping {
         if (SynonymJson.nodedict.containsKey(str1)){
             if (SynonymJson.nodedict.get(str1).contains(str2)) return 1;
         }
+        if (str1.equals(str2)) return 1;
         str1 = str1.toLowerCase();
         str2 = str2.toLowerCase();
-        if (str1.equals(str2)) return 1;
-        if (str1.contains(str2) && (2 * str2.length() >  str1.length())) return ((double)str2.length()) / str1.length();
-        if (str2.contains(str1) && (2 * str1.length() >  str2.length())) return ((double)str1.length()) / str2.length();
+        if (str1.equals(str2)) return 0.8;
+        if (str1.contains(str2) && (2 * str2.length() >  str1.length())) return ((double)str2.length()) / str1.length() * 0.8;
+        if (str2.contains(str1) && (2 * str1.length() >  str2.length())) return ((double)str1.length()) / str2.length() * 0.8;
         return 0;
     }
     public static boolean isUnDirect(String str){

@@ -29,6 +29,7 @@ public class CyphersGenerator {
                 if (node.token.mapping instanceof NLPAttributeSchemaMapping){
                     if (node.nextNode.size() == 0){
                         returnText += String.format(" n%d.%s",query.focusNode.id,((NLPAttributeSchemaMapping)node.token.mapping).attrType);
+                        query.returnType = "string";
                         return returnText;
                     }
 
@@ -36,7 +37,7 @@ public class CyphersGenerator {
             }
 
         }
-        returnText += String.format(" n%d",query.focusNode.id);
+        returnText += String.format(" n%d, id(n%d), labels(n%d)",query.focusNode.id,query.focusNode.id,query.focusNode.id);
         return returnText;
     }
 
@@ -88,7 +89,7 @@ public class CyphersGenerator {
                     matchStr += String.format("(n%d:%s)",start.node.id,((NLPVertexSchemaMapping)start.node.token.mapping).vertexType.name);
                 if (start.isEnd) { break;}
                 String r = "";
-                if (start.nextRelation.edgeType != null) r = "["+start.nextRelation.edgeType.name+"]";
+                if (start.nextRelation.edgeType != null) r = "[:"+start.nextRelation.edgeType.name+"]";
                 if (start.direct) matchStr += String.format("-%s->",r); else matchStr += String.format("<-%s-",r);
                 start = start.nextInferNode;
             }

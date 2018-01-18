@@ -22,9 +22,7 @@ public class Evaluator {
             query.score = -1;
             return;
         }
-        double val = mappingNum() * 100 + offsetValue() + graphComplex() * 10 + similar() * 0.1;
-        if (val < 4.2)
-            System.out.println();
+        double val = mappingNum() * 30 + offsetValue() + graphComplex() * 10 + similar() * 0.1;
         query.score = val;
     }
 

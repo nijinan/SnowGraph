@@ -17,6 +17,10 @@
       "similar" : ["call"]
     },
     {
+      "relationName" : ["have_method"],
+      "similar" : ["have"]
+    },
+    {
       "relationName" : ["soAuthor"],
       "similar" : ["author","write"]
     },

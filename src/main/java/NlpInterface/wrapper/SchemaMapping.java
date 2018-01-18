@@ -41,7 +41,7 @@ public class SchemaMapping {
                     for (NLPNode faNode : query.nodes) {
                         if (Math.abs(faNode.token.offset - node.token.offset) != offset) continue;
                         if (faNode.token.mapping instanceof NLPAttributeSchemaMapping &&
-                                faNode.token.mapping.equals(((NLPAttributeMapping) node.token.mapping).type)) {
+                                ((NLPAttributeSchemaMapping)faNode.token.mapping).attrType.equals(((NLPAttributeMapping) node.token.mapping).type.attrType)) {
                             if (!faNode.nextNode.isEmpty()) continue;
                             NLPRelation relation1 = new NLPRelation("is");
                             NLPRelation relation2 = new NLPRelation("is");

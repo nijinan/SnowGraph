@@ -4,6 +4,7 @@ import NlpInterface.entity.*;
 import NlpInterface.entity.TokenMapping.NLPAttributeSchemaMapping;
 import NlpInterface.entity.TokenMapping.NLPMapping;
 import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
+import NlpInterface.schema.GraphEdgeType;
 import NlpInterface.schema.GraphVertexType;
 import NlpInterface.schema.GraphPath;
 
@@ -162,6 +163,42 @@ public class LinkAllNodes {
                 newNode.addLast(last,relation2);
                 last = newNode;
             }
+            if (path.nodes.size() == 0){
+                double max = 0;
+                GraphEdgeType edge = null;
+                for (GraphEdgeType edgeType : ((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.outcomingsEdges){
+                    if (edgeType.end.name.equals(((NLPVertexSchemaMapping) nodej.token.mapping).vertexType.name)){
+                        double tmp = TokenMapping.disText(edgeType.name,query);
+                        if (max < tmp){
+                            max = tmp;
+                            edge = edgeType;
+                        }
+                    }
+                }
+                for (GraphEdgeType edgeType : ((NLPVertexSchemaMapping) nodej.token.mapping).vertexType.outcomingsEdges){
+                    if (edgeType.end.name.equals(((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.name)){
+                        double tmp = TokenMapping.disText(edgeType.name,query);
+                        if (max < tmp){
+                            max = tmp;
+                            edge = edgeType;
+                        }
+                    }
+                }
+                if (edge != null) {
+                    NLPRelation relation1 = new NLPRelation(edge, "what");
+                    NLPRelation relation2 = new NLPRelation(edge, "what");
+                    if (edge.start.name.equals(((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.name))
+                        relation2.direct = false;
+                    else relation1.direct = false;
+                    relation1.mirror = relation2;
+                    relation2.mirror = relation1;
+
+                    last.addNext(nodej, relation1);
+                    nodej.addLast(last, relation2);
+                    continue;
+                }
+            }
+
             NLPRelation relation1 = new NLPRelation("hidden");
             NLPRelation relation2 = new NLPRelation("hidden");
             relation1.mirror = relation2;
@@ -169,6 +206,7 @@ public class LinkAllNodes {
             relation2.direct = false;
             last.addNext(nodej, relation1);
             nodej.addLast(last, relation2);
+
         }
     }
 

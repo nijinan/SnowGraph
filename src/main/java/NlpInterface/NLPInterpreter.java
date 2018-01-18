@@ -20,12 +20,12 @@ public class NLPInterpreter {
         mapTokensToNodeAndRelation(query);
         List<NLPToken> tmp = new ArrayList<>();
         offsetMax = query.tokens.size();
-        for (NLPToken token : query.tokens){
-            if (token.mapping != null){
-                tmp.add(token);
-            }
-        }
-        query.tokens = tmp;
+//        for (NLPToken token : query.tokens){
+//            if (token.mapping != null){
+//                tmp.add(token);
+//            }
+//        }
+        //query.tokens = tmp;
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < offsetMax; i++) list.add(0);
         cypherStr  = "";
@@ -57,6 +57,18 @@ public class NLPInterpreter {
             }
         }
         System.out.println(answers.size());
+        answers.sort(Comparator.comparing(p->p.score));
+        Set<Query> anstmp = new HashSet<>();
+        for (Query q : answers){
+            boolean flag = true;
+            for (Query qq : anstmp){
+                if (q.cypher.equals(qq.cypher)) {flag = false; break;}
+            }
+            if (flag) anstmp.add(q);
+        }
+        answers.clear();
+        answers.addAll(anstmp);
+
         answers.sort(Comparator.comparing(p->p.score));
         if (answers.size() > 20) answers = answers.subList(0,20);
         for (Query q : answers) {

@@ -9,6 +9,7 @@ public class NLPRelation {
     public GraphEdgeType edgeType;
     public GraphAttribute attrType;
     public String otherType;
+    public boolean hidden = false;
     public NLPRelation mirror;
     public boolean direct = true;
     public NLPRelation(){

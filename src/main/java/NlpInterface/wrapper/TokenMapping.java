@@ -19,7 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class TokenMapping {
-    public static double threshold = 0.5;
+    public static double threshold = 0.9;
+    public static double thresholdEdge = 0.5;
     public static void process(Query query){
         /* 全文匹配，疑问词匹配 ，之后改成模糊匹配，*
         需要记录下AST/
@@ -31,7 +32,7 @@ public class TokenMapping {
             if (token.mapping != null) continue;
             for (String edgeTypeName : graphSchema.edgeTypes.keySet()){
                 double similar = isSimilar(token.text, edgeTypeName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
+                if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPEdgeSchemaMapping(edgeTypeName,null, token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -51,7 +52,7 @@ public class TokenMapping {
             //if (token.mapping != null) continue;
             for (String pathName : graphSchema.paths.keySet()){
                 double similar = isSimilar(token.text, pathName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
+                if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPPathSchemaMapping(pathName,null, token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -71,7 +72,7 @@ public class TokenMapping {
             //if (token.mapping != null) continue;
             for (String vertexTypeName : graphSchema.vertexTypes.keySet()){
                 double similar = isSimilar(token.text, vertexTypeName);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
+                if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPVertexSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),token, similar);
                     if (token.mapping == null){
                         token.mappingList.add(mapping);
@@ -187,7 +188,7 @@ public class TokenMapping {
                     boolean flag = false;
                     for (NLPToken tok : query.tokens) {
                         if (tok.mapping != null) {
-                            if (tok.mapping instanceof NLPVertexMapping && ((NLPVertexMapping) tok.mapping).vertex.equals(vertex)) {
+                            if (tok.mapping instanceof NLPVertexSchemaMapping && ((NLPVertexSchemaMapping) tok.mapping).vertexType.name.equals(vertex.labels)) {
                                 flag = true;
                                 break;
                             }
@@ -196,7 +197,16 @@ public class TokenMapping {
                     if (!flag) continue;
                     Node node = db.getNodeById(vertex.id);
                     for (String attrTypeName : graphSchema.vertexTypes.get(vertex.labels).attrs.keySet()) {
-
+                        boolean flag2 = false;
+                        for (NLPToken tok : query.tokens) {
+                            if (tok.mapping != null) {
+                                if (tok.mapping instanceof NLPAttributeSchemaMapping && ((NLPAttributeSchemaMapping) tok.mapping).attrType.equals(attrTypeName)) {
+                                    flag2 = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!flag2) continue;
                         Object obj = node.getAllProperties().get(attrTypeName);
                         if (!(obj instanceof String)) continue;
                         String attrValue = (String)obj;

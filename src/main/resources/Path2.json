@@ -1,0 +1,46 @@
+[
+  {
+    "start" : ["Class"],
+    "end" : ["Method"],
+    "length" : 2,
+    "relations" :
+    [
+      {"from" : ["Class"] , "to" : ["Method"] , "via" : "have_method", "direct" : true},
+      {"from" : ["Method"] , "to" : ["Method"] , "via" : "call_method", "direct" : true}
+    ],
+    "keywords": ["call"]
+  },
+  {
+    "start" : ["JiraIssueUser"],
+    "end" : ["Method","Class","Interface"],
+    "length" : 2,
+    "relations" :
+    [
+      {"from" : ["JiraIssueUser"] , "to" : ["JiraIssue"] , "via" : "jira_is_assignee_of_issue", "direct" : true},
+      {"from" : ["JiraIssue"] , "to" : ["Method","Class","Interface"] , "via" : "apiNameMention", "direct" : true}
+    ],
+    "keywords": ["change"]
+  },
+  {
+    "start" : ["gitCommitAuthor"],
+    "end" : ["Method","Interface"],
+    "length" : 2,
+    "relations" :
+    [
+      {"from" : ["gitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
+      {"from" : ["gitCommit"] , "to" : ["Method","Class","Interface"] , "via" : "apiNameMention", "direct" : true}
+    ],
+    "keywords": ["change"]
+  },
+  {
+    "start" : ["gitCommitAuthor"],
+    "end" : ["Class"],
+    "length" : 2,
+    "relations" :
+    [
+      {"from" : ["gitCommitAuthor"] , "to" : ["gitCommit"] , "via" : "person_is_author_of_commit", "direct" : true},
+      {"from" : ["gitCommit"] , "to" : ["Class"] , "via" : "commit_change_the_class", "direct" : true}
+    ],
+    "keywords": ["change"]
+  }
+]

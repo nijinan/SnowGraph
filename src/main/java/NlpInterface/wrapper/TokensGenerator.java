@@ -18,6 +18,7 @@ public class TokensGenerator {
             if (!StopWords.isStopWord(token.text)) {
                 offset++;
                 token.offset = offset;
+                token.offsetVal = offset;
                 query.tokens.add(token);
             }
         }

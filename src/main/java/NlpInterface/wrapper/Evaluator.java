@@ -4,6 +4,8 @@ import NlpInterface.entity.NLPNode;
 import NlpInterface.entity.NLPRelation;
 import NlpInterface.entity.NLPToken;
 import NlpInterface.entity.Query;
+import NlpInterface.entity.TokenMapping.NLPPathSchemaMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexMapping;
 import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class Evaluator {
             query.score = -1;
             return;
         }
-        double val = mappingNum() * 30 + offsetValue() + graphComplex() * 10 + similar() * 0.1;
+        double val = mappingNum() * 30 + offsetValue() + graphComplex() * 10 + similar() * 0.1 + linkEntity() * 100;
         query.score = val;
     }
 
@@ -51,12 +53,12 @@ public class Evaluator {
             visitedRelation.add(r);visitedRelation.add(r.mirror);
             double bias = 2.0;
             if (r.token != null){
-                if (r.direct ^ !r.token.POS.equals("VBD") ^ (start.token.offset < r.token.offset)){
+                if (r.direct ^ !r.token.POS.equals("VBD") ^ (start.token.offsetVal < r.token.offsetVal)){
                     bias = 1.0;
                 }
-                tot += bias * Math.abs(start.token.offset - r.token.offset);
+                tot += bias * Math.abs(start.token.offsetVal - r.token.offsetVal);
             }else if (!n.token.text.equals("what")){
-                    tot += Math.abs(start.token.offset - n.token.offset)*(len+1) / 2 ;
+                    tot += Math.abs(start.token.offsetVal - n.token.offsetVal)*(len+1) / 2 ;
                 }
             else{
                 tot += dfsNode(start,n,len+1);
@@ -103,6 +105,11 @@ public class Evaluator {
                 }
             }
         }
+        for (NLPToken token: query.tokens){
+            if (token.mapping instanceof NLPPathSchemaMapping){
+                val -= ((NLPPathSchemaMapping)token.mapping).path.nodes.size();
+            }
+        }
         return val;
     }
 
@@ -127,6 +134,24 @@ public class Evaluator {
         }
         return nodeVal / nodeNum;
     }
+
+    public static double linkEntity(){
+        double val = 0;
+        double nodeVal = 0;
+        int nodeNum = 0;
+        for (NLPNode node : query.nodes){
+            for (int i = 0; i < node.nextNode.size(); i++) {
+                NLPNode n = node.nextNode.get(i);
+                if (n.token.mapping instanceof NLPVertexMapping && node.token.mapping instanceof NLPVertexMapping){
+                    nodeVal ++;
+                }
+                nodeNum ++;
+            }
+        }
+        if (nodeNum == 0) return 0;
+        return nodeVal / nodeNum;
+    }
+
     public static boolean isLink(){
         for (int i = 0; i < query.nodes.size(); i++) visited[i] = false;
         for (NLPNode node : query.nodes){

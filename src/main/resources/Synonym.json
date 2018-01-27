@@ -2,7 +2,7 @@
   "node":
   [
     {
-      "nodeName" : ["StackOverflowUser","JiraIssueUser","StackOverflowUser","MailUser"],
+      "nodeName" : ["StackOverflowUser","JiraIssueUser","StackOverflowUser","MailUser", "gitCommitAuthor"],
       "similar" : ["user","person","who"]
     },
     {
@@ -21,7 +21,7 @@
       "similar" : ["have"]
     },
     {
-      "relationName" : ["soAuthor"],
+      "relationName" : ["soAuthor","jira_is_assignee_of_issue"],
       "similar" : ["author","write"]
     },
     {

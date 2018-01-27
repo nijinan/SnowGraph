@@ -11,8 +11,11 @@ public class NLPNode {
     public List<NLPRelation> nextRelation = new ArrayList<>();
     public List<NLPNode> lastNode = new ArrayList<>();
     public List<NLPRelation> lastRelation = new ArrayList<>();
+
     public int id;
     public boolean focus = false;
+    public boolean hasattr = false;
+    public boolean middle = false;
     public NLPNode (NLPToken token){
         this.token = token;
     }
@@ -28,7 +31,8 @@ public class NLPNode {
         NLPNode node = new NLPNode(token);
         node.id = id;
         node.focus = focus;
-
+        node.middle = middle;
+        node.hasattr = hasattr;
         node.nextRelation.addAll(nextRelation);
         node.lastRelation.addAll(lastRelation);
 

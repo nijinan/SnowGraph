@@ -76,6 +76,7 @@ public class SchemaMapping {
                             relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
+                            faNode.hasattr = true;
                             find = true;
                             break;
                         }
@@ -148,7 +149,7 @@ public class SchemaMapping {
                             if (nodeStart == nodeEnd) continue;
                             if (edgeType.end.name.equals(((NLPVertexSchemaMapping) nodeEnd.token.mapping).vertexType.name)) {
                                 flagFind = true;
-                                double newscore = Math.abs(token.offset + direct * 1 - nodeEnd.token.offset) + Math.abs(token.offset - direct * 1 - nodeStart.token.offset);
+                                double newscore = Math.abs(token.offsetVal + direct * 1 - nodeEnd.token.offsetVal) + Math.abs(token.offsetVal - direct * 1 - nodeStart.token.offsetVal);
                                 if (newscore < score) {
                                     score = newscore;
                                     nodeStartFinal = nodeStart;
@@ -179,7 +180,7 @@ public class SchemaMapping {
                     newNode.token.mapping = mapping;
                     newNode.focus = true;
 
-                    double newscore = Math.abs(token.offset - direct*1 -node.token.offset);
+                    double newscore = Math.abs(token.offsetVal - direct*1 -node.token.offsetVal);
                     if (newscore < score){
                         flagFind = true;
                         score = newscore ;
@@ -195,7 +196,7 @@ public class SchemaMapping {
                     newNode.token.mapping = mapping;
                     newNode.focus = true;
 
-                    double newscore = Math.abs(token.offset + direct*1 -node.token.offset);
+                    double newscore = Math.abs(token.offsetVal + direct*1 -node.token.offsetVal);
                     if (newscore < score){
                         flagFind = true;
                         score = newscore ;

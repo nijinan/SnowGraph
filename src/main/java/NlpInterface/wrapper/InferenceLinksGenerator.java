@@ -38,15 +38,32 @@ public class InferenceLinksGenerator {
         for (NLPNode node : query.nodes){
             if (node.focus){
                 query.focusNode = node;
+                node.focus = true;
                 startNode = node;
                 return;
             }
         }
+        /*long offsetmin = 100;
         for (NLPNode node : query.nodes){
-            if (node.token.mapping instanceof NLPVertexSchemaMapping && !(node.token.mapping instanceof NLPVertexMapping)) {
+            if (node.token.mapping instanceof NLPVertexSchemaMapping && !(node.token.mapping instanceof NLPVertexMapping) && !(node.token.text.equals("what"))
+                    && !node.hasattr) {
+                int nums = node.nextNode.size() + node.lastNode.size();
+                long offset = node.token.offset;
+
+                if (offset < offsetmin) {
+                    offsetmin = offset;
+                    query.focusNode = node;
+
+                }
+            }
+        }
+        if (offsetmin < 100) { query.focusNode.focus = true;startNode = query.focusNode; return;}*/
+        for (NLPNode node : query.nodes){
+            if (node.token.mapping instanceof NLPVertexSchemaMapping && !(node.token.mapping instanceof NLPVertexMapping) && !node.hasattr){
                 int nums = node.nextNode.size() + node.lastNode.size();
                 if (nums == 1) {
                     query.focusNode = node;
+                    node.focus = true;
                     startNode = node;
                     return;
                 }
@@ -55,8 +72,10 @@ public class InferenceLinksGenerator {
         for (NLPNode node : query.nodes){
             if (node.token.mapping instanceof NLPVertexSchemaMapping){
                 query.focusNode = node;
+                node.focus = true;
                 startNode = node;
                 return;
+
             }
         }
     }

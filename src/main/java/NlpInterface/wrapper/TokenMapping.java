@@ -90,41 +90,41 @@ public class TokenMapping {
                 }
             }
         }
-        for (NLPToken token : query.tokens){
-            if (token.mapping != null) continue;
-            for (Vertex vertex : graph.getAllVertexes()){
-                double similar = isSimilar(token.text, vertex.name);
-                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
-                    boolean flag = false;
-                    for (NLPToken tok : query.tokens){
-                        if (tok.mapping != null && tok.mapping instanceof NLPEdgeSchemaMapping){
-                            for (GraphEdgeType edgeType : ExtractModel.getSingle().graphSchema.edgeTypes.get(((NLPEdgeSchemaMapping) tok.mapping).type)){
-                                if  (edgeType.start.name.equals(vertex.labels) || edgeType.end.name.equals(vertex.labels) ){
-                                    flag = true; break;
-                                }
-                            }
-                            if (flag) break;
-                        }
-                    }
-                    if (!flag) continue;
-                    NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
-                    //token.mapping = mapping;
-                    if (token.mapping == null){
-                        token.mappingList.add(mapping);
-                        token.mapping = mapping;
-                        continue;
-                    }
-                    if (similar < token.mapping.score + 0.01){
-                        token.mappingList.add(mapping);
-                        continue;
-                    }
-                    //token.mappingList.clear();
-                    token.mapping = mapping;
-                    token.mappingList.add(mapping);
-                    //break;
-                }
-            }
-        }
+//        for (NLPToken token : query.tokens){
+//            if (token.mapping != null) continue;
+//            for (Vertex vertex : graph.getAllVertexes()){
+//                double similar = isSimilar(token.text, vertex.name);
+//                if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
+//                    boolean flag = false;
+//                    for (NLPToken tok : query.tokens){
+//                        if (tok.mapping != null && tok.mapping instanceof NLPEdgeSchemaMapping){
+//                            for (GraphEdgeType edgeType : ExtractModel.getSingle().graphSchema.edgeTypes.get(((NLPEdgeSchemaMapping) tok.mapping).type)){
+//                                if  (edgeType.start.name.equals(vertex.labels) || edgeType.end.name.equals(vertex.labels) ){
+//                                    flag = true; break;
+//                                }
+//                            }
+//                            if (flag) break;
+//                        }
+//                    }
+//                    if (!flag) continue;
+//                    NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
+//                    //token.mapping = mapping;
+//                    if (token.mapping == null){
+//                        token.mappingList.add(mapping);
+//                        token.mapping = mapping;
+//                        continue;
+//                    }
+//                    if (similar < token.mapping.score + 0.01){
+//                        token.mappingList.add(mapping);
+//                        continue;
+//                    }
+//                    //token.mappingList.clear();
+//                    token.mapping = mapping;
+//                    token.mappingList.add(mapping);
+//                    //break;
+//                }
+//            }
+//        }
         for (NLPToken token : query.tokens){
             if (token.mapping != null) continue;
             for (Vertex vertex : graph.getAllVertexes()){
@@ -268,6 +268,33 @@ public class TokenMapping {
             }
             token.mappingList = newlist;
         }
+        for (NLPToken token : query.tokens){
+            if (token.mapping instanceof  NLPVertexSchemaMapping && !(token.mapping instanceof  NLPVertexMapping)){
+                boolean flag = false;
+                for (NLPToken token2 : query.tokens){
+                    if (token2.offset == token.offset + 1){
+                        for (NLPMapping mapping : token2.mappingList){
+                            if (mapping instanceof  NLPVertexMapping){
+                                if (((NLPVertexMapping)mapping).vertexType.name.equals(((NLPVertexSchemaMapping) token.mapping).vertexType.name)){
+                                    flag = true;
+                                    List<NLPMapping> mappings = new ArrayList<>();
+                                    mappings.add(mapping);
+                                    token2.mapping = mapping;
+                                    token2.mappingList = mappings;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (flag){
+                    token.mappingList.clear();
+                    token.mapping = null;
+                    token.nomapping = true;
+                }
+            }
+        }
         /*计算score & rank*/
         for (NLPToken token : query.tokens){
             for (NLPMapping mapping : token.mappingList){
@@ -282,10 +309,11 @@ public class TokenMapping {
                     name1 = ((NLPEdgeSchemaMapping)mapping).edgeType.start.name;
                     name2 = ((NLPEdgeSchemaMapping)mapping).edgeType.end.name;
                     name = ((NLPEdgeSchemaMapping)mapping).type;
-                }else if (mapping instanceof NLPVertexSchemaMapping){
-                    name = ((NLPVertexSchemaMapping)mapping).vertexType.name;
                 }else if (mapping instanceof NLPVertexMapping){
-                    name = ((NLPVertexMapping)mapping).vertex.longName;
+                    name = ((NLPVertexMapping)mapping).vertex.name;
+                }
+                else if (mapping instanceof NLPVertexSchemaMapping){
+                    name = ((NLPVertexSchemaMapping)mapping).vertexType.name;
                 }else if (mapping instanceof NLPAttributeSchemaMapping){
                     name = ((NLPAttributeSchemaMapping)mapping).attrType;
                 }else if (mapping instanceof NLPAttributeMapping){
@@ -299,8 +327,9 @@ public class TokenMapping {
             }
 
             token.mappingList.sort(Comparator.comparing(p->p.score*-1));
-            if (token.mappingList.size() > 10){
-                token.mappingList = token.mappingList.subList(0,10);
+            int t = 200/(query.tokens.size()*query.tokens.size());
+            if (token.mappingList.size() > t){
+                token.mappingList = token.mappingList.subList(0,t);
             }
             for (int i = 0;  i < token.mappingList.size(); i++) {
                 token.mappingList.get(i).rank = i;
@@ -332,13 +361,48 @@ public class TokenMapping {
         if (SynonymJson.nodedict.containsKey(str1)){
             if (SynonymJson.nodedict.get(str1).contains(str2)) return 1;
         }
+        for (String str : SynonymJson.edgedict.keySet()){
+            if (SynonymJson.edgedict.get(str).contains(str2)){
+                double tmp = subSimilar(str1,str);
+                if (tmp > thresholdEdge){
+                    return tmp;
+                }
+            }
+        }
+        for (String str : SynonymJson.nodedict.keySet()){
+            if (SynonymJson.nodedict.get(str).contains(str2)){
+                double tmp = subSimilar(str1,str);
+                if (tmp > threshold){
+                    return tmp;
+                }
+            }
+        }
+        return subSimilar(str1,str2);
+
+    }
+    public static double subSimilar (String str1, String str2){
         if (str1.equals(str2)) return 1;
         str1 = str1.toLowerCase();
         str2 = str2.toLowerCase();
         if (str1.equals(str2)) return 0.8;
+        str1 = str1.replaceAll("_","");
+        str2 = str2.replaceAll("_","");
         if (str1.contains(str2) && (2 * str2.length() >  str1.length())) return ((double)str2.length()) / str1.length() * 0.8;
         if (str2.contains(str1) && (2 * str1.length() >  str2.length())) return ((double)str1.length()) / str2.length() * 0.8;
-        return 0;
+        int f[][] = new int[str1.length()+1][str2.length()+1];
+        for (int i = 0; i <= str1.length(); i++) f[i][0] = 0;
+        for (int i = 0; i <= str2.length(); i++) f[0][i] = 0;
+
+        for (int i = 1; i <= str1.length(); i++){
+            for (int j = 1; j <= str2.length(); j++){
+                if (str1.charAt(i-1) == str2.charAt(j-1)){
+                    f[i][j] = Math.max(f[i-1][j],f[i][j-1]);
+                    f[i][j] = Math.max(f[i-1][j-1]+1,f[i][j]);
+                }else f[i][j] = Math.max(f[i-1][j],f[i][j-1]);
+            }
+        }
+        if (f[str1.length()][str2.length()]*3 < Math.min(str1.length()+1,str2.length()+1)) return 0;
+        return 0.7 * f[str1.length()][str2.length()] / Math.max(str1.length()+1,str2.length()+1) ;
     }
     public static boolean isUnDirect(String str){
         if (str.endsWith("ed")){

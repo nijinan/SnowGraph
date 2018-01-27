@@ -62,6 +62,7 @@ public class EdgeMappingSchema {
                         relation2.mirror = relation1;
                         relation2.direct = false;
                         NLPNode newNode = new NLPNode(new NLPToken("what"));
+                        newNode.middle = true;
                         NLPMapping mapping = new NLPVertexSchemaMapping(vertexType,newNode.token,1);
                         newNode.token.mapping = mapping;
                         newNode.id = newquery.nodes.size();
@@ -135,6 +136,7 @@ public class EdgeMappingSchema {
                 NLPMapping mapping = new NLPVertexSchemaMapping(ExtractModel.getSingle().
                         graphSchema.vertexTypes.get(endname),newNode.token,1);
                 newNode.token.mapping = mapping;
+                newNode.token.offsetVal = query.tokens.get(t).offsetVal + 0.5;
                 newNode.id = nodes.size();
                 nodes.add(newNode);
                 mapStart[t] = node.id;
@@ -147,6 +149,7 @@ public class EdgeMappingSchema {
                 NLPMapping mapping = new NLPVertexSchemaMapping(ExtractModel.getSingle().
                         graphSchema.vertexTypes.get(startname),newNode.token,1);
                 newNode.token.mapping = mapping;
+                newNode.token.offsetVal = query.tokens.get(t).offsetVal - 0.5;
                 newNode.id = nodes.size();
                 nodes.add(newNode);
                 mapStart[t] = newNode.id;
@@ -160,6 +163,7 @@ public class EdgeMappingSchema {
                 graphSchema.vertexTypes.get(startname),newNodeStart.token,1);
         newNodeStart.token.mapping = mappingStart;
         newNodeStart.id = nodes.size();
+        newNodeStart.token.offsetVal = query.tokens.get(t).offsetVal - 0.5;
         mapStart[t] = newNodeStart.id;
         nodes.add(newNodeStart);
 
@@ -168,6 +172,7 @@ public class EdgeMappingSchema {
                 graphSchema.vertexTypes.get(endname),newNodeEnd.token,1);
         newNodeEnd.token.mapping = mappingEnd;
         newNodeEnd.id = nodes.size();
+        newNodeEnd.token.offsetVal = query.tokens.get(t).offsetVal + 0.5;
         mapEnd[t] = newNodeEnd.id;
         nodes.add(newNodeEnd);
         DFS(t+1);
@@ -189,7 +194,7 @@ public class EdgeMappingSchema {
                         if (nodeStart == nodeEnd) continue;
                         if (((NLPVertexSchemaMapping) nodeEnd.token.mapping).vertexType.incomings.keySet().contains(edgeTypeName)){
                             flagFind = true;
-                            double newscore = Math.abs(token.offset + direct*1 -nodeEnd.token.offset)+Math.abs(token.offset - direct*1 -nodeStart.token.offset);
+                            double newscore = Math.abs(token.offsetVal + direct*1 -nodeEnd.token.offsetVal)+Math.abs(token.offsetVal - direct*1 -nodeStart.token.offsetVal);
                             if (newscore < score){
                                 score = newscore ;
                                 nodeStartFinal = nodeStart;
@@ -230,7 +235,7 @@ public class EdgeMappingSchema {
 //                    newNode.addLast(node,relation1);
 //                    node.addNext(newNode,relation2);
 //                    query.nodes.add(newNode);
-                    double newscore = Math.abs(token.offset - direct*1 -node.token.offset);
+                    double newscore = Math.abs(token.offsetVal - direct*1 -node.token.offsetVal);
                     if (newscore < score){
                         flagFind = true;
                         score = newscore ;
@@ -254,7 +259,7 @@ public class EdgeMappingSchema {
 //                    newNode.addNext(node,relation1);
 //                    node.addLast(newNode,relation2);
 //                    query.nodes.add(newNode);
-                    double newscore = Math.abs(token.offset + direct*1 -node.token.offset);
+                    double newscore = Math.abs(token.offsetVal + direct*1 -node.token.offsetVal);
                     if (newscore < score){
                         flagFind = true;
                         score = newscore ;

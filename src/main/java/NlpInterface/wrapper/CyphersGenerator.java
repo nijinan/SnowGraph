@@ -72,7 +72,7 @@ public class CyphersGenerator {
                         GraphSchemaKeywords.getSingle().types.get(((NLPVertexMapping) node.token.mapping).vertex.labels).getLeft(),
                         ((NLPVertexMapping) node.token.mapping).vertex.name);
             }
-
+            first = false;
         }
         if (whereText.equals("WHERE")) return "";
         return whereText;

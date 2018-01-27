@@ -32,11 +32,12 @@ public class NLPInterpreter {
         JSONObject obj = new JSONObject();
         JSONArray arr = new JSONArray();
 
-        DFS(query,0,list,arr);
+        DFS(query,0,list,arr,0);
         //generatorTuples(query);
         //generatorTupleLinks(query);
         int tot = 0;
         List<Query> answers = new ArrayList<>();
+        System.out.println(queries.size());
         for (Query query1 : queries){
             if (query1.nodes.size() == 0) continue;
             List<Query> listq = new ArrayList<>();
@@ -82,7 +83,8 @@ public class NLPInterpreter {
         }*/
     }
 
-    public static void DFS(Query query, int offset, List<Integer> list, JSONArray arr){
+    public static void DFS(Query query, int offset, List<Integer> list, JSONArray arr, int no){
+        if (no > 2) return;
         if (offset == offsetMax){
             for (NLPToken token : query.tokens){
                 if (list.get((int)token.offset) < 0) token.mapping = null; else
@@ -99,15 +101,15 @@ public class NLPInterpreter {
             if (token.offset == offset){
                 flag = true;
                 list.set(offset,-1);
-                DFS(query,offset+1, list,arr);
+                DFS(query,offset+1, list,arr,no+1);
                 for (int i = 0; i < token.mappingList.size(); i++){
                     list.set(offset,i);
-                    DFS(query,offset+1, list,arr);
+                    DFS(query,offset+1, list,arr,no);
                 }
             }
         }
 
-        if (!flag) DFS(query,offset+1, list,arr);
+        if (!flag) DFS(query,offset+1, list,arr,no);
     }
 
     public static Query generatorTokens(String plainText){

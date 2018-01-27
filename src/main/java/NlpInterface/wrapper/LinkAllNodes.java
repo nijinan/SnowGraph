@@ -3,6 +3,7 @@ package NlpInterface.wrapper;
 import NlpInterface.entity.*;
 import NlpInterface.entity.TokenMapping.NLPAttributeSchemaMapping;
 import NlpInterface.entity.TokenMapping.NLPMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexMapping;
 import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
 import NlpInterface.schema.GraphEdgeType;
 import NlpInterface.schema.GraphVertexType;
@@ -25,9 +26,9 @@ public class LinkAllNodes {
     public static List<Query> process(Query query){
         LinkAllNodes.query = query;
         queries = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {color[i] = -1; prim[i] = 1e10;}
-        for (int i = 0; i < 100; i++)
-            for (int j = 0; j < 100; j++)
+        for (int i = 0; i < query.nodes.size()+10; i++) {color[i] = -1; prim[i] = 1e10;}
+        for (int i = 0; i < query.nodes.size()+10; i++)
+            for (int j = 0; j < query.nodes.size()+10; j++)
                 dis[i][j] = 1e10;
         colors = 0;
         coloring();
@@ -84,9 +85,21 @@ public class LinkAllNodes {
     public static double distance(NLPNode node1, NLPNode node2){
         if (node1.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
         if (node2.token.mapping instanceof NLPAttributeSchemaMapping) return 1e10;
+
+
         if (node1.token.mapping instanceof NLPVertexSchemaMapping && node2.token.mapping instanceof NLPVertexSchemaMapping){
+            double delta = 10;
+            if (node1.token.mapping instanceof NLPVertexMapping && node2.token.mapping instanceof NLPVertexMapping)delta = 20;
+            if (!(node1.token.mapping instanceof NLPVertexMapping) && !(node2.token.mapping instanceof NLPVertexMapping))delta = 0;
+            if (node1.middle || node2.middle)delta +=10;
+            if (node1.token.text.equals("what")) delta += 5;
+            if (node2.token.text.equals("what")) delta += 5;
             if (((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.keySet().contains(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name)){
                 int step = ((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name).edges.size();
+
+                if (node1.token.offset < 0 && node2.token.offset < 0){
+                    return step * 100 + Math.abs(node1.token.offsetVal - node2.token.offsetVal) +delta;
+                }
                 double offset1 = node1.token.offset;
                 double offset2 = node2.token.offset;
                 if (offset1 < 0){
@@ -95,7 +108,7 @@ public class LinkAllNodes {
                 if (offset2 < 0){
                     offset2 = getAverageOffset(node2);
                 }
-                return step * 100 + Math.abs(offset1 - offset2);
+                return step * 100 + Math.abs(offset1 - offset2) +delta;
 
             }
         }
@@ -155,6 +168,7 @@ public class LinkAllNodes {
                 relation2.mirror = relation1;
                 relation2.direct = false;
                 NLPNode newNode = new NLPNode(new NLPToken("what"));
+                newNode.middle = true;
                 NLPMapping mapping = new NLPVertexSchemaMapping(vertexType,newNode.token,1);
                 newNode.token.mapping = mapping;
                 newNode.id = query.nodes.size();
@@ -192,9 +206,13 @@ public class LinkAllNodes {
                     else relation1.direct = false;
                     relation1.mirror = relation2;
                     relation2.mirror = relation1;
-
-                    last.addNext(nodej, relation1);
-                    nodej.addLast(last, relation2);
+                    if (relation1.direct) {
+                        last.addNext(nodej, relation1);
+                        nodej.addLast(last, relation2);
+                    } else {
+                        nodej.addNext(last, relation2);
+                        last.addLast(nodej, relation1);
+                    }
                     continue;
                 }
             }

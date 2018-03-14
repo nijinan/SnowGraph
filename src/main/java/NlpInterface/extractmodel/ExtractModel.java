@@ -26,7 +26,7 @@ public class ExtractModel {
 	Map<String,Integer> str2id = new HashMap<>();
 	public static ExtractModel getSingle(){
 		if (single != null) return single;
-		single = new ExtractModel("C:\\Users\\dell\\Documents\\graphdb-more");
+		single = new ExtractModel("D:\\Users\\dell\\Documents\\graphdb-more");
 		return single;
 	}
 	private ExtractModel(String srcPath){

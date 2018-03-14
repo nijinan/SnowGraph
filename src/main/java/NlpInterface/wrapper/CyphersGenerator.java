@@ -46,6 +46,10 @@ public class CyphersGenerator {
         boolean first = true;
         for (NLPNode node : query.nodes) {
             if (!(node.token.mapping instanceof NLPVertexSchemaMapping)) continue;
+            if (((NLPVertexSchemaMapping) node.token.mapping).must){
+                if (first) whereText += String.format(" id(n%d)=%s",node.id,((NLPVertexSchemaMapping) node.token.mapping).l.get(0).id);else
+                    whereText += String.format(" AND id(n%d)=%s",node.id,((NLPVertexSchemaMapping) node.token.mapping).l.get(0).id);
+            }
             for (int i = 0; i < node.nextNode.size(); i++){
                 boolean firstAttrValue = true;
                 NLPRelation relation = node.nextRelation.get(i);

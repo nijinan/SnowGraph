@@ -32,7 +32,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import searcher.graph.GraphSearcher;
 import searcher.graph.SearchResult;
-import searcher.ir.LuceneSearchResult;
 import utils.parse.TokenizationUtils;
 
 import java.io.IOException;
@@ -43,8 +42,8 @@ import java.util.List;
 
 public class LuceneIndex {
 
-    private QueryParser qp = new QueryParser("attr_val", new EnglishAnalyzer());
-    private IndexSearcher indexSearcher = null;
+    private static QueryParser qp = new QueryParser("attr_val", new EnglishAnalyzer());
+    private static IndexSearcher indexSearcher = null;
 
     public void index() throws IOException {
 
@@ -83,7 +82,7 @@ public class LuceneIndex {
 
     }
 
-    public List<LuceneSearchResult> query(String q) {
+    public static List<LuceneSearchResult> query(String q) {
 
         List<LuceneSearchResult> r = new ArrayList<>();
 
@@ -110,7 +109,7 @@ public class LuceneIndex {
         }
         TopDocs topDocs = null;
         try {
-            topDocs = indexSearcher.search(query, 100);
+            topDocs = indexSearcher.search(query,10);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -128,7 +127,9 @@ public class LuceneIndex {
 //                    document.get("type"), document.get("title"), document.get("org_content"),
 //                    new Double(scoreDoc.score).doubleValue(), document.get("node_set"));
 //            r.add(result);
+            LuceneSearchResult result = new LuceneSearchResult(Long.parseLong(document.get("id")) , document.get("vertex_type") , document.get("attr_type"), document.get("attr_val"));
             System.out.println(document.get("id") + document.get("vertex_type") + document.get("attr_type") + document.get("attr_val"));
+            r.add(result);
         }
         return r;
     }

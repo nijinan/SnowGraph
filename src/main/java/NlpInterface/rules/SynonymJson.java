@@ -15,6 +15,7 @@ public class SynonymJson {
     public static GraphSchema graphSchema;
     public static Map<String,Set<String>> nodedict = new HashMap<>();
     public static Map<String,Set<String>> edgedict = new HashMap<>();
+    public static Map<String,Set<String>> attributedict = new HashMap<>();
     static {
         readJson();
     }
@@ -53,6 +54,21 @@ public class SynonymJson {
                         edgedict.put(simStr,new HashSet<>());
                     }
                     edgedict.get(simStr).add(edgeStr);
+                }
+            }
+        }
+        for (int i = 0; i < JsonObj.getJSONArray("attribute").length(); i++){
+            JSONObject obj = JsonObj.getJSONArray("attribute").getJSONObject(i);
+            JSONArray edgeArr = obj.getJSONArray("attributeName");
+            JSONArray simArr = obj.getJSONArray("similar");
+            for (int j = 0; j <  edgeArr.length(); j++){
+                for (int k = 0; k <  simArr.length(); k++){
+                    String edgeStr = edgeArr.getString(j);
+                    String simStr = simArr.getString(k);
+                    if (!attributedict.keySet().contains(simArr.getString(k))){
+                        attributedict.put(simStr,new HashSet<>());
+                    }
+                    attributedict.get(simStr).add(edgeStr);
                 }
             }
         }

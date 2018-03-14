@@ -10,6 +10,17 @@
       "similar" : ["commit"]
     }
   ],
+  "attribute":
+  [
+    {
+    "attributeName" : ["createDate","date","createdDate","updatedDate"],
+    "similar" : ["when","date","time"]
+    },
+    {
+      "attributeName" : ["crearorName"],
+      "similar" : ["user","who"]
+    }
+  ],
   "relation":
   [
     {
@@ -21,7 +32,7 @@
       "similar" : ["have"]
     },
     {
-      "relationName" : ["soAuthor","jira_is_assignee_of_issue"],
+      "relationName" : ["soAuthor","jira_is_assignee_of_issue","jira_is_creator_of_issue"],
       "similar" : ["author","write"]
     },
     {

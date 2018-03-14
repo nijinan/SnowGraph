@@ -32,6 +32,8 @@ public class SchemaMapping {
             cnt++;
         }
     }
+
+
     public static void linkAttributeAndAttributeSchema(){
         /*make pair attribute with attrbuteschema*/
         for (NLPNode node : query.nodes){

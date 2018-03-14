@@ -2,6 +2,7 @@ package NlpInterface;
 
 import NlpInterface.entity.*;
 import NlpInterface.entity.TokenMapping.NLPVertexMapping;
+import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
 import NlpInterface.wrapper.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -100,8 +101,11 @@ public class NLPInterpreter {
         for (NLPToken token : query.tokens){
             if (token.offset == offset){
                 flag = true;
-                list.set(offset,-1);
-                DFS(query,offset+1, list,arr,no+1);
+                if (!(token.mapping instanceof NLPVertexSchemaMapping) ||
+                        !((NLPVertexSchemaMapping)token.mapping).must) {
+                    list.set(offset, -1);
+                    DFS(query, offset + 1, list, arr, no + 1);
+                }
                 for (int i = 0; i < token.mappingList.size(); i++){
                     list.set(offset,i);
                     DFS(query,offset+1, list,arr,no);

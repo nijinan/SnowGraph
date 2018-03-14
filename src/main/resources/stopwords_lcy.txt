@@ -30,7 +30,6 @@ theirs
 themselves
 what
 which
-who
 whom
 this
 that
@@ -94,7 +93,6 @@ then
 once
 here
 there
-when
 where
 why
 how

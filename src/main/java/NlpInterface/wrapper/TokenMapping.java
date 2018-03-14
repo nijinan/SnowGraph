@@ -6,6 +6,7 @@ import NlpInterface.entity.TokenMapping.*;
 import NlpInterface.extractmodel.ExtractModel;
 import NlpInterface.extractmodel.Graph;
 import NlpInterface.extractmodel.Vertex;
+import NlpInterface.ir.LuceneSearchResult;
 import NlpInterface.rules.SynonymJson;
 import NlpInterface.schema.GraphEdgeType;
 import NlpInterface.schema.GraphPath;
@@ -31,7 +32,7 @@ public class TokenMapping {
             /*先schema匹配，后实体匹配*/
             if (token.mapping != null) continue;
             for (String edgeTypeName : graphSchema.edgeTypes.keySet()){
-                double similar = isSimilar(token.text, edgeTypeName);
+                double similar = isSimilar(token.text, edgeTypeName, "relation");
                 if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPEdgeSchemaMapping(edgeTypeName,null, token, similar);
                     if (token.mapping == null){
@@ -51,7 +52,7 @@ public class TokenMapping {
             }
             //if (token.mapping != null) continue;
             for (String pathName : graphSchema.paths.keySet()){
-                double similar = isSimilar(token.text, pathName);
+                double similar = isSimilar(token.text, pathName,"relation");
                 if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPPathSchemaMapping(pathName,null, token, similar);
                     if (token.mapping == null){
@@ -71,7 +72,7 @@ public class TokenMapping {
             }
             //if (token.mapping != null) continue;
             for (String vertexTypeName : graphSchema.vertexTypes.keySet()){
-                double similar = isSimilar(token.text, vertexTypeName);
+                double similar = isSimilar(token.text, vertexTypeName,"node");
                 if (similar > thresholdEdge  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                     NLPMapping mapping = new NLPVertexSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),token, similar);
                     if (token.mapping == null){
@@ -128,7 +129,7 @@ public class TokenMapping {
         for (NLPToken token : query.tokens){
             if (token.mapping != null) continue;
             for (Vertex vertex : graph.getAllVertexes()){
-                double similar = isSimilar(token.text, vertex.name);
+                double similar = isSimilar(token.text, vertex.name, "");
                 if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score - 0.01*/) )){
                     NLPMapping mapping = new NLPVertexMapping(vertex,graphSchema.vertexTypes.get(vertex.labels),token, similar);
                     if (token.mapping == null){
@@ -159,7 +160,7 @@ public class TokenMapping {
                 }
                 if (!flag) continue;
                 for (String attrName : graphSchema.vertexTypes.get(vertexTypeName).attrs.keySet()){
-                    double similar = isSimilar(token.text, attrName);
+                    double similar = isSimilar(token.text, attrName,"attribute");
                     if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                         NLPMapping mapping = new NLPAttributeSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),attrName,token, similar);
                         //token.mapping = mapping;
@@ -210,7 +211,7 @@ public class TokenMapping {
                         Object obj = node.getAllProperties().get(attrTypeName);
                         if (!(obj instanceof String)) continue;
                         String attrValue = (String)obj;
-                        double similar = isSimilar(token.text, attrValue);
+                        double similar = isSimilar(token.text, attrValue, "");
                         if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                             NLPMapping mapping = new NLPAttributeMapping(vertex, graphSchema.vertexTypes.get(vertex.labels), attrTypeName, attrValue, token, similar);
                             if (token.mapping == null){
@@ -241,7 +242,7 @@ public class TokenMapping {
                     continue;
                 }
                 String edgeTypeName = ((NLPEdgeSchemaMapping)mapping).type;
-                double similar = isSimilar(token.text, edgeTypeName);
+                double similar = isSimilar(token.text, edgeTypeName, "relation");
                 for (GraphEdgeType edgeType : graphSchema.edgeTypes.get(edgeTypeName)){
                     NLPMapping newmapping = new NLPEdgeSchemaMapping(edgeTypeName,edgeType, token, similar);
                     newlist.add(newmapping);
@@ -259,7 +260,7 @@ public class TokenMapping {
                     continue;
                 }
                 String edgeTypeName = ((NLPPathSchemaMapping)mapping).type;
-                double similar = isSimilar(token.text, edgeTypeName);
+                double similar = isSimilar(token.text, edgeTypeName, "relation");
                 for (GraphPath edgeType : graphSchema.paths.get(edgeTypeName)){
                     NLPMapping newmapping = new NLPPathSchemaMapping(edgeTypeName,edgeType, token, similar);
                     newlist.add(newmapping);
@@ -295,6 +296,36 @@ public class TokenMapping {
                 }
             }
         }
+        for (NLPToken token : query.tokens){
+            if (token.mapping instanceof NLPNoticeMapping){
+                for (NLPToken token2 : query.tokens){
+                    if (token2.offset == token.offset-1){
+                        for (NLPMapping m : token2.mappingList){
+                            if (m instanceof NLPVertexSchemaMapping && !(m instanceof NLPVertexMapping)){
+                                for (LuceneSearchResult r : ((NLPNoticeMapping)token.mapping).list){
+                                    if (((NLPVertexSchemaMapping) m).vertexType.name.equals(r.vertex_type)){
+                                        ((NLPVertexSchemaMapping) m).must = true;
+                                        if (((NLPVertexSchemaMapping) m).l == null){
+                                            ((NLPVertexSchemaMapping) m).l = new ArrayList<>();
+                                        }
+                                        ((NLPVertexSchemaMapping) m).l.add(r);
+                                    }
+                                }
+                                if (((NLPVertexSchemaMapping) m).must) {
+                                    token2.mapping = m;
+                                    break;
+                                }
+                            }
+                        }
+                        if (((NLPVertexSchemaMapping) token2.mapping).must){
+                            token2.mappingList.clear();
+                            token2.mappingList.add(token2.mapping);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         /*计算score & rank*/
         for (NLPToken token : query.tokens){
             for (NLPMapping mapping : token.mappingList){
@@ -318,7 +349,7 @@ public class TokenMapping {
                     name = ((NLPAttributeSchemaMapping)mapping).attrType;
                 }else if (mapping instanceof NLPAttributeMapping){
                     name = ((NLPAttributeMapping)mapping).attrValue;
-                }
+                }else if (mapping instanceof  NLPNoticeMapping) continue;
                 if (name1 != null){
                     mapping.score = mapping.score + disText(name,query) * 0.4 + disText(name1,query) * 0.3 + disText(name2,query) * 0.3;
                 }else
@@ -348,32 +379,46 @@ public class TokenMapping {
     public static double disText(String str, Query query){
         double ret = 0;
         for (NLPToken token : query.tokens){
-            ret += isSimilar(str,token.text);
+            ret += isSimilar(str,token.text,"");
         }
         ret /= query.tokens.size();
         return ret;
     }
     /*计算两个token的相似度，后者为NN*/
-    public static double isSimilar(String str1, String str2){
-        if (SynonymJson.edgedict.containsKey(str1)){
-            if (SynonymJson.edgedict.get(str1).contains(str2)) return 1;
-        }
-        if (SynonymJson.nodedict.containsKey(str1)){
-            if (SynonymJson.nodedict.get(str1).contains(str2)) return 1;
-        }
-        for (String str : SynonymJson.edgedict.keySet()){
-            if (SynonymJson.edgedict.get(str).contains(str2)){
-                double tmp = subSimilar(str1,str);
-                if (tmp > thresholdEdge){
-                    return tmp;
+    public static double isSimilar(String str1, String str2, String type){
+        if (type.equals("relation")) {
+            if (SynonymJson.edgedict.containsKey(str1)) {
+                if (SynonymJson.edgedict.get(str1).contains(str2)) return 1;
+            }
+            if (SynonymJson.nodedict.containsKey(str1)) {
+                if (SynonymJson.nodedict.get(str1).contains(str2)) return 1;
+            }
+            for (String str : SynonymJson.edgedict.keySet()) {
+                if (SynonymJson.edgedict.get(str).contains(str2)) {
+                    double tmp = subSimilar(str1, str);
+                    if (tmp > thresholdEdge) {
+                        return tmp;
+                    }
                 }
             }
         }
-        for (String str : SynonymJson.nodedict.keySet()){
-            if (SynonymJson.nodedict.get(str).contains(str2)){
-                double tmp = subSimilar(str1,str);
-                if (tmp > threshold){
-                    return tmp;
+        if (type.equals("node")) {
+            for (String str : SynonymJson.nodedict.keySet()) {
+                if (SynonymJson.nodedict.get(str).contains(str2)) {
+                    double tmp = subSimilar(str1, str);
+                    if (tmp > threshold) {
+                        return tmp;
+                    }
+                }
+            }
+        }
+        if (type.equals("attribute")) {
+            for (String str : SynonymJson.attributedict.keySet()) {
+                if (SynonymJson.attributedict.get(str).contains(str2)) {
+                    double tmp = subSimilar(str1, str);
+                    if (tmp > threshold) {
+                        return tmp;
+                    }
                 }
             }
         }

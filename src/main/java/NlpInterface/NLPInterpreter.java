@@ -15,7 +15,7 @@ public class NLPInterpreter {
     public static List<Query> queries = new ArrayList<>();
     private static int offsetMax;
     public static JSONObject pipeline(String plainText){
-
+        long startTime = System.currentTimeMillis();
         queries.clear();
         Query query = generatorTokens(plainText);
         mapTokensToNodeAndRelation(query);
@@ -77,6 +77,8 @@ public class NLPInterpreter {
             arr.put(q.toJsonQuery());
         }
         obj.put("rankedResults", arr);
+        long endTime = System.currentTimeMillis();
+        System.out.println(endTime-startTime);
         return obj;
         /*CypherSet cyphers = generatorCyphers(query);
         for (Cypher cypher : cyphers.sets){
@@ -85,7 +87,7 @@ public class NLPInterpreter {
     }
 
     public static void DFS(Query query, int offset, List<Integer> list, JSONArray arr, int no){
-        if (no > 2) return;
+        if (no > 1) return;
         if (offset == offsetMax){
             for (NLPToken token : query.tokens){
                 if (list.get((int)token.offset) < 0) token.mapping = null; else
@@ -104,6 +106,7 @@ public class NLPInterpreter {
                 if (!(token.mapping instanceof NLPVertexSchemaMapping) ||
                         !((NLPVertexSchemaMapping)token.mapping).must) {
                     list.set(offset, -1);
+                    if (token.nomapping)DFS(query, offset + 1, list, arr, no);else
                     DFS(query, offset + 1, list, arr, no + 1);
                 }
                 for (int i = 0; i < token.mappingList.size(); i++){

@@ -1,13 +1,3 @@
 [
-  {
-    "start" : ["Class"],
-    "end" : ["Method"],
-    "length" : 2,
-    "relations" :
-    [
-      {"from" : ["Class"] , "to" : ["Method"] , "via" : "have_method", "direct" : true},
-      {"from" : ["Method"] , "to" : ["Method"] , "via" : "call_method", "direct" : true}
-    ],
-    "keywords": ["call"]
-  },
+
 ]

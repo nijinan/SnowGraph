@@ -92,8 +92,8 @@ public class LinkAllNodes {
             if (node1.token.mapping instanceof NLPVertexMapping && node2.token.mapping instanceof NLPVertexMapping)delta = 20;
             if (!(node1.token.mapping instanceof NLPVertexMapping) && !(node2.token.mapping instanceof NLPVertexMapping))delta = 0;
             if (node1.middle || node2.middle)delta +=10;
-            if (node1.token.text.equals("what")) delta += 5;
-            if (node2.token.text.equals("what")) delta += 5;
+//            if (node1.token.text.equals("what")) delta += 5;
+//            if (node2.token.text.equals("what")) delta += 5;
             if (((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.keySet().contains(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name)){
                 int step = ((NLPVertexSchemaMapping) node1.token.mapping).vertexType.shortestPaths.get(((NLPVertexSchemaMapping) node2.token.mapping).vertexType.name).edges.size();
 
@@ -179,10 +179,14 @@ public class LinkAllNodes {
             }
             if (path.nodes.size() == 0){
                 double max = 0;
+                if (((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.name.equals("Class") &&
+                        ((NLPVertexSchemaMapping) nodej.token.mapping).vertexType.name.equals("gitCommit")){
+                    System.out.println();
+                }
                 GraphEdgeType edge = null;
                 for (GraphEdgeType edgeType : ((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.outcomingsEdges){
                     if (edgeType.end.name.equals(((NLPVertexSchemaMapping) nodej.token.mapping).vertexType.name)){
-                        double tmp = TokenMapping.disText(edgeType.name,query);
+                        double tmp = TokenMapping.disTextf(edgeType.name,query);
                         if (max < tmp){
                             max = tmp;
                             edge = edgeType;
@@ -191,7 +195,7 @@ public class LinkAllNodes {
                 }
                 for (GraphEdgeType edgeType : ((NLPVertexSchemaMapping) nodej.token.mapping).vertexType.outcomingsEdges){
                     if (edgeType.end.name.equals(((NLPVertexSchemaMapping) nodei.token.mapping).vertexType.name)){
-                        double tmp = TokenMapping.disText(edgeType.name,query);
+                        double tmp = TokenMapping.disTextf(edgeType.name,query);
                         if (max < tmp){
                             max = tmp;
                             edge = edgeType;

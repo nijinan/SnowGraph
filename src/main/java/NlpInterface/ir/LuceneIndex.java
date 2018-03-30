@@ -136,8 +136,8 @@ public class LuceneIndex {
 
     public static void main(String args[]) throws IOException {
         LuceneIndex  LI = new LuceneIndex();
-        //LI.index();
-        LI.query("Bad instructions for setting up JavaCC");
+        LI.index();
+        //LI.query("Bad instructions for setting up JavaCC");
     }
 }
 

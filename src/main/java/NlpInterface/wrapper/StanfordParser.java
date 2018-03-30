@@ -15,6 +15,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.*;
 
@@ -29,12 +30,16 @@ public class StanfordParser {
     }
     public StanfordParser(){
         props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+        props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+        props.put("parse.model","edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
+       // props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
         pipeline = new StanfordCoreNLP(props);
+
     }
     public List<NLPToken> runAllAnnotators(String text){
 
         // create an empty Annotation just with the given text
+        if (!(text.endsWith(".")||text.endsWith("?"))) text = text+".";
         Annotation document = new Annotation(text);
         // run all Annotators on this text
         pipeline.annotate(document);
@@ -64,6 +69,7 @@ public class StanfordParser {
                     name = "";
                 }
                 NLPToken nlptoken = new NLPToken(word,pos,ne);
+                System.out.println(pos);
                 nlptoken.offset = offset++;
                 set.add(nlptoken);
             }

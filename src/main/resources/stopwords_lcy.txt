@@ -43,9 +43,6 @@ were
 be
 been
 being
-has
-had
-having
 do
 does
 did
@@ -210,3 +207,7 @@ ch
 javascript
 thank
 thx
+list
+.
+what
+which

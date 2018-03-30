@@ -23,6 +23,7 @@ import java.util.*;
 public class GitExtractor implements Extractor {
 
     @EntityDeclaration
+    //public static final String COMMIT = "GitCommit";
     public static final String COMMIT = "gitCommit";
     @PropertyDeclaration
     public static final String COMMIT_UUID = "UUID";

@@ -43,6 +43,7 @@ public class TokensGenerator {
         List<NLPToken> set = StanfordParser.getSingle().runAllAnnotators(text);
         for (NLPToken token : set){
             if (!StopWords.isStopWord(token.text)) {
+                token.roffset = token.offset;
                 offset++;
                 token.offset = offset;
                 token.offsetVal = offset;

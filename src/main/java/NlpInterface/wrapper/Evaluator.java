@@ -24,7 +24,10 @@ public class Evaluator {
             query.score = -1;
             return;
         }
-        double val = mappingNum() * 30 + offsetValue() + graphComplex() * 10 + similar() * 0.1 + linkEntity() * 100;
+        double val = mappingNum() * 30 + offsetValue()  + similar()*10 + graphComplex() * 30 + (linkEntity()) * 100;
+        if (val < 46)
+            System.out.println();
+        val = mappingNum() * 30 + offsetValue()  + similar()*10+ graphComplex() * 30 + (linkEntity()) * 100;
         query.score = val;
     }
 
@@ -52,11 +55,15 @@ public class Evaluator {
             NLPRelation r = allRelations.get(i);
             visitedRelation.add(r);visitedRelation.add(r.mirror);
             double bias = 2.0;
+
             if (r.token != null){
-                if (r.direct ^ !r.token.POS.equals("VBD") ^ (start.token.offsetVal < r.token.offsetVal)){
+                if (r.token.text.equals("called")){
+                    System.out.println();
+                }
+                if (r.direct ^ !r.token.POS.equals("VBN") ^ (start.token.offsetVal < r.token.offsetVal)){
                     bias = 1.0;
                 }
-                tot += bias * Math.abs(start.token.offsetVal - r.token.offsetVal);
+                tot += bias * Math.abs(start.token.offsetVal - r.token.offsetVal)*(len+1) / 2;
             }else if (!n.token.text.equals("what")){
                     tot += Math.abs(start.token.offsetVal - n.token.offsetVal)*(len+1) / 2 ;
                 }
@@ -151,7 +158,17 @@ public class Evaluator {
         if (nodeNum == 0) return 0;
         return nodeVal / nodeNum;
     }
-
+    public static double fakelink() {
+        double val = 0;
+        for (NLPNode node : query.nodes){
+            if (node.token.text.equals("what") && node.token.offsetVal > 2){
+                if (node.nextNode.size() + node.lastNode.size() == 1){
+                    val ++;
+                }
+            }
+        }
+        return val;
+    }
     public static boolean isLink(){
         for (int i = 0; i < query.nodes.size(); i++) visited[i] = false;
         for (NLPNode node : query.nodes){

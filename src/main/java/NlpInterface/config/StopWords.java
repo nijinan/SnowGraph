@@ -29,6 +29,9 @@ public class StopWords {
         });
     }
     public static boolean isStopWord(String word){
-        return englishStopWords.contains(word);
+        stemmer.setCurrent(word);
+        stemmer.stem();
+        String s = stemmer.getCurrent();
+        return englishStopWords.contains(word) || englishStopWords.contains(s);
     }
 }

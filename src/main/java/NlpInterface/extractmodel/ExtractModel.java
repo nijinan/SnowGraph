@@ -27,6 +27,7 @@ public class ExtractModel {
 	public static ExtractModel getSingle(){
 		if (single != null) return single;
 		single = new ExtractModel("D:\\Users\\dell\\Documents\\graphdb-more");
+		//single = new ExtractModel("F:\\0319NJN1");
 		return single;
 	}
 	private ExtractModel(String srcPath){
@@ -131,6 +132,7 @@ public class ExtractModel {
 				for (Iterator<Label> o_iterator = node.getLabels().iterator(); o_iterator.hasNext(); ) {
 					Label label = o_iterator.next();
 					String node_type = label.name();
+					//if (node_type.equals("GitCommit")) System.out.println("asd");
 					if (!GraphSchemaKeywords.getSingle().types.containsKey(node_type)) continue;
 					Object leftObj = node.getProperty(GraphSchemaKeywords.getSingle().types.get(node_type).getLeft());
 					Object rightObj = node.getProperty(GraphSchemaKeywords.getSingle().types.get(node_type).getRight());
@@ -184,6 +186,7 @@ public class ExtractModel {
 					String node_type = label.name();
 					GraphVertexType vertexType = graphSchema.vertexTypes.get(node_type);
 					for (String propertiesName : node.getAllProperties().keySet()){
+						if (vertexType == null) System.out.println(node_type);
 						if (!vertexType.attrs.keySet().contains(propertiesName)){
 							vertexType.attrs.put(propertiesName,new GraphAttribute(propertiesName,vertexType));
 						}

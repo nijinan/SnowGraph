@@ -56,6 +56,18 @@
       "similar" : ["author","write","written"]
     },
     {
+      "relationName" : ["jira_is_creator_of_issue"],
+      "similar" : ["create"]
+    },
+    {
+      "relationName" : ["jira_is_reporter_of_issue"],
+      "similar" : ["report"]
+    },
+    {
+      "relationName" : ["rt"],
+      "similar" : ["returnType","return"]
+    },
+    {
       "relationName" : ["commit_change_the_class","author_of_commit"],
       "similar" : ["change","modify"]
     }

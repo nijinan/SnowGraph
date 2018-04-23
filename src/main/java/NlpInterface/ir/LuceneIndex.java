@@ -109,7 +109,7 @@ public class LuceneIndex {
         }
         TopDocs topDocs = null;
         try {
-            topDocs = indexSearcher.search(query,10);
+            topDocs = indexSearcher.search(query,100);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

@@ -32,9 +32,9 @@ public class StanfordParser {
         props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
         props.put("parse.model","edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-       // props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+        //props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
         pipeline = new StanfordCoreNLP(props);
-
+         //pipeline = new StanfordCoreNLP("StanfordCoreNLP-chinese.properties");
     }
     public List<NLPToken> runAllAnnotators(String text){
 
@@ -69,7 +69,7 @@ public class StanfordParser {
                     name = "";
                 }
                 NLPToken nlptoken = new NLPToken(word,pos,ne);
-                System.out.println(pos);
+                System.out.println(pos +" " + word);
                 nlptoken.offset = offset++;
                 set.add(nlptoken);
             }
@@ -80,5 +80,10 @@ public class StanfordParser {
             set.add(nlptoken);
         }
         return set;
+    }
+    public static void main(String[] args){
+        String text = "它被打死了。";
+        StanfordParser p = new StanfordParser();
+        p.runAllAnnotators(text);
     }
 }

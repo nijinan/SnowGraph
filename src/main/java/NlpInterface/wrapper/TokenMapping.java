@@ -5,7 +5,6 @@ import NlpInterface.entity.Query;
 import NlpInterface.entity.TokenMapping.*;
 import NlpInterface.extractmodel.ExtractModel;
 import NlpInterface.extractmodel.Graph;
-import NlpInterface.extractmodel.GraphSchemaKeywords;
 import NlpInterface.extractmodel.Vertex;
 import NlpInterface.ir.LuceneSearchResult;
 import NlpInterface.rules.SynonymJson;
@@ -19,6 +18,7 @@ import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 public class TokenMapping {
@@ -171,6 +171,11 @@ public class TokenMapping {
                     double similar = isSimilar(token.text, attrName,"attribute");
                     if (similar > threshold  && ((token.mapping == null)||(token.mapping != null /*&& similar > token.mapping.score*/) )){
                         NLPMapping mapping = new NLPAttributeSchemaMapping(graphSchema.vertexTypes.get(vertexTypeName),attrName,token, similar);
+                        if (NLPAttributeSchemaMapping.isBoolAttr(attrName)) {
+                            ((NLPAttributeSchemaMapping)mapping).isbool = true;
+                            ((NLPAttributeSchemaMapping)mapping).boolval = true;
+                            if (query.text.contains("non")||query.text.contains("not")) ((NLPAttributeSchemaMapping)mapping).boolval = false;
+                        }
                         //token.mapping = mapping;
                         if (token.mapping != null && token.mapping instanceof  NLPVertexMapping) token.mappingList.clear();
                         if (token.mapping == null){
@@ -311,10 +316,9 @@ public class TokenMapping {
         }
         for (NLPToken token : query.tokens){
             if (token.mapping instanceof NLPNoticeMapping){
-                for (NLPToken token2 : query.tokens){
+                for (int off = 1; off <= 3; off++) {
                     boolean flag = false;
-                    for (int off = 1; off <= 3; off++) {
-
+                    for (NLPToken token2 : query.tokens){
                         if (token2.offset == token.offset - off) {
                             for (NLPMapping m : token2.mappingList) {
                                 if (m instanceof NLPVertexSchemaMapping && !(m instanceof NLPVertexMapping)) {
@@ -323,8 +327,10 @@ public class TokenMapping {
                                             ((NLPVertexSchemaMapping) m).must = true;
                                             if (((NLPVertexSchemaMapping) m).l == null) {
                                                 ((NLPVertexSchemaMapping) m).l = new ArrayList<>();
+                                                ((NLPVertexSchemaMapping) m).s = new HashSet<>();
                                             }
                                             ((NLPVertexSchemaMapping) m).l.add(r);
+                                            ((NLPVertexSchemaMapping) m).s.add(r.id);
                                         }
                                     }
                                     if (((NLPVertexSchemaMapping) m).must) {
@@ -332,8 +338,30 @@ public class TokenMapping {
                                         break;
                                     }
                                 }
+                                if (m instanceof NLPAttributeSchemaMapping) {
+                                    for (LuceneSearchResult r : ((NLPNoticeMapping) token.mapping).list) {
+                                        if (((NLPAttributeSchemaMapping) m).vertexType.name.equals(r.vertex_type)
+                                                && ((NLPAttributeSchemaMapping) m).attrType.equals(r.attr_type)) {
+                                            ((NLPAttributeSchemaMapping) m).must = true;
+                                            if (((NLPAttributeSchemaMapping) m).l == null) {
+                                                ((NLPAttributeSchemaMapping) m).l = new ArrayList<>();
+                                                ((NLPAttributeSchemaMapping) m).s = new HashSet<>();
+                                            }
+                                            ((NLPAttributeSchemaMapping) m).l.add(r);
+                                            ((NLPAttributeSchemaMapping) m).s.add(r.id);
+                                        }
+                                    }
+                                    if (((NLPAttributeSchemaMapping) m).must) {
+                                        token2.mapping = m;
+                                        break;
+                                    }
+                                }
                             }
                             if (token2.mapping != null && token2.mapping instanceof NLPVertexSchemaMapping && ((NLPVertexSchemaMapping) token2.mapping).must) {
+                                token2.mappingList.clear();
+                                token2.mappingList.add(token2.mapping);
+                                flag = true;
+                            }else if (token2.mapping != null && token2.mapping instanceof NLPAttributeSchemaMapping && ((NLPAttributeSchemaMapping) token2.mapping).must) {
                                 token2.mappingList.clear();
                                 token2.mappingList.add(token2.mapping);
                                 flag = true;

@@ -329,7 +329,7 @@ public class EdgeMappingSchema {
     }
     public static boolean linkAttributeSchemaAndVectexSchemaAndVertex(Query query){
         for (NLPNode node : query.nodes) {
-            if (node.token.mapping instanceof NLPAttributeSchemaMapping && node.nextNode.isEmpty()) { //has no value
+            if (node.token.mapping instanceof NLPAttributeSchemaMapping && node.nextNode.isEmpty() && node.lastNode.isEmpty()) { //has no value
                 boolean flag = false;
                 for (long offset = 1; offset < 20; offset++) {
                     for (NLPNode faNode : query.nodes) {

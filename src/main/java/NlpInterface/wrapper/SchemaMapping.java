@@ -104,7 +104,7 @@ public class SchemaMapping {
                             relation2.direct = false;
                             faNode.addNext(node, relation1);
                             node.addLast(faNode, relation2);
-                            faNode.focus = true;
+                            if (!((NLPAttributeSchemaMapping) node.token.mapping).must && !((NLPAttributeSchemaMapping) node.token.mapping).isbool)faNode.focus = true;
                             flag = true;
                             break;
                         }

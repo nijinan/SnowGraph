@@ -1,11 +1,9 @@
 package NlpInterface.wrapper;
 
 import NlpInterface.entity.*;
-import NlpInterface.entity.TokenMapping.NLPAttributeMapping;
-import NlpInterface.entity.TokenMapping.NLPAttributeSchemaMapping;
-import NlpInterface.entity.TokenMapping.NLPVertexMapping;
-import NlpInterface.entity.TokenMapping.NLPVertexSchemaMapping;
+import NlpInterface.entity.TokenMapping.*;
 import NlpInterface.extractmodel.GraphSchemaKeywords;
+import NlpInterface.ir.LuceneSearchResult;
 
 public class CyphersGenerator {
     public static Query query;
@@ -26,7 +24,7 @@ public class CyphersGenerator {
             NLPRelation relation = query.focusNode.nextRelation.get(i);
             NLPNode node = query.focusNode.nextNode.get(i);
             if (relation.otherType != null && relation.otherType.equals("has")){
-                if (node.token.mapping instanceof NLPAttributeSchemaMapping){
+                if (node.token.mapping instanceof NLPAttributeSchemaMapping && !((NLPAttributeSchemaMapping)node.token.mapping).isbool && !((NLPAttributeSchemaMapping)node.token.mapping).must){
                     if (node.nextNode.size() == 0){
                         returnText += String.format(" n%d.%s",query.focusNode.id,((NLPAttributeSchemaMapping)node.token.mapping).attrType);
                         query.returnType = "string";
@@ -47,8 +45,16 @@ public class CyphersGenerator {
         for (NLPNode node : query.nodes) {
             if (!(node.token.mapping instanceof NLPVertexSchemaMapping)) continue;
             if (((NLPVertexSchemaMapping) node.token.mapping).must){
-                if (first) whereText += String.format(" id(n%d)=%s",node.id,((NLPVertexSchemaMapping) node.token.mapping).l.get(0).id);else
-                    whereText += String.format(" AND id(n%d)=%s",node.id,((NLPVertexSchemaMapping) node.token.mapping).l.get(0).id);
+                String haha = "";
+                for (Long r : ((NLPVertexSchemaMapping)node.token.mapping).s){
+                    if (haha.equals("")){
+                        haha = String.format("id(n%d)=%s",node.id,r);
+                    }else haha += String.format(" OR id(n%d)=%s",node.id,r);
+                }
+                haha = "(" + haha + ")";
+                if (first) whereText += String.format(" %s",haha);else
+                    whereText += String.format(" AND %s",haha);
+                first = false;
             }
             for (int i = 0; i < node.nextNode.size(); i++){
                 boolean firstAttrValue = true;
@@ -56,6 +62,17 @@ public class CyphersGenerator {
                 String attrStr = "";
                 NLPNode nodeA = node.nextNode.get(i);
                 if (relation.otherType != null && relation.otherType.equals("has")){
+                    if (((NLPAttributeSchemaMapping) nodeA.token.mapping).must){
+                        for (Long r : ((NLPAttributeSchemaMapping)nodeA.token.mapping).s){
+                            if (firstAttrValue)attrStr += String.format("id(n%d)=%s",node.id,r);
+                            else attrStr += String.format(" OR id(n%d)=%s",node.id,r);
+                            firstAttrValue = false;
+                        }
+                    }else if (((NLPAttributeSchemaMapping)nodeA.token.mapping).isbool){
+                        if (firstAttrValue) attrStr += String.format("n%d.%s =%s",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeSchemaMapping)nodeA.token.mapping).boolval);
+                        else attrStr += String.format(" OR n%d.%s =%s",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeSchemaMapping)nodeA.token.mapping).boolval);
+                        firstAttrValue = false;
+                    }else
                     for (NLPNode nodeB : nodeA.nextNode){
                         if (firstAttrValue) attrStr += String.format("n%d.%s =\"%s\"",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeMapping)nodeB.token.mapping).attrValue);
                         else attrStr += String.format(" OR n%d.%s =\"%s\"",node.id,((NLPAttributeSchemaMapping)nodeA.token.mapping).attrType,((NLPAttributeMapping)nodeB.token.mapping).attrValue);

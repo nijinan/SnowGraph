@@ -5,10 +5,12 @@ import NlpInterface.ir.LuceneSearchResult;
 import NlpInterface.schema.GraphVertexType;
 
 import java.util.List;
+import java.util.Set;
 
 public class NLPVertexSchemaMapping extends NLPMapping{
     public GraphVertexType vertexType;
     public List<LuceneSearchResult> l;
+    public Set<Long> s;
     public boolean must = false;
     public NLPVertexSchemaMapping(GraphVertexType vertexType, NLPToken token, double similar){
         super(token, similar);

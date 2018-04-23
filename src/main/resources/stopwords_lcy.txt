@@ -161,8 +161,6 @@ impress
 site
 google
 clever
-implement
-static
 void
 main
 println
@@ -175,7 +173,6 @@ jar
 javadoc
 market
 bug
-final
 arg
 break
 continue
